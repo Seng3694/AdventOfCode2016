@@ -1,0 +1,5 @@
+BasedOnStyle: LLVM
+AllowShortFunctionsOnASingleLine: false
+SortIncludes: false
+BinPackParameters: true
+AlwaysBreakAfterReturnType: None
