@@ -9,7 +9,7 @@
 
 #include <stdio.h>
 #include <stdarg.h>
-#define AUX_LOG(...) printf(__VA_ARGS__);
+#define AUX_LOG(...) printf(__VA_ARGS__)
 #else
 #define AUX_LOG(...)
 #endif
