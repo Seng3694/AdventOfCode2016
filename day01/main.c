@@ -5,6 +5,8 @@
 #include <ctype.h>
 #include <math.h>
 
+#include <aux.h>
+
 typedef enum {
   TURN_DIR_LEFT,
   TURN_DIR_RIGHT,
@@ -22,6 +24,10 @@ typedef struct {
   int length;
 } instruction;
 
+#define ARRAY_T instruction
+#define ARRAY_T_NAME Instr
+#include <aux_array.h>
+
 typedef struct {
   int x;
   int y;
@@ -34,33 +40,8 @@ static const position MOVE_POSITIONS[] = {
     [FACE_DIR_WEST] = {-1, 0},
 };
 
-static bool read_file_to_string(const char *path, char **output,
-                                size_t *length) {
-  FILE *file = fopen(path, "r");
-  if (!file) {
-    return false;
-  }
-  fseek(file, 0, SEEK_END);
-  const size_t size = ftell(file);
-  rewind(file);
-  char *content = malloc(size + 1);
-  if (!content) {
-    fclose(file);
-    return false;
-  }
-  content[size] = '\0';
-  fread(content, size, 1, file);
-  fclose(file);
-  *output = content;
-  return true;
-}
-
-static void parse(char *input, instruction **output, size_t *outputLength) {
-  size_t instructionsCapacity = 128;
-  size_t instructionsLength = 0;
-  instruction *instructions =
-      malloc(sizeof(instruction) * instructionsCapacity);
-
+static void parse(char *input, AuxArrayInstr *instructions) {
+  AuxArrayInstrCreate(instructions, 128);
   while (*input != '\0') {
     instruction instr = {0};
     instr.direction = *input == 'L' ? TURN_DIR_LEFT : TURN_DIR_RIGHT;
@@ -69,15 +50,8 @@ static void parse(char *input, instruction **output, size_t *outputLength) {
     while (*input != '\0' && (*input == ' ' || *input == ',')) {
       input++;
     }
-    if (instructionsLength + 1 > instructionsCapacity) {
-      instructionsCapacity *= 2;
-      instructions =
-          realloc(instructions, sizeof(instruction) * instructionsCapacity);
-    }
-    instructions[instructionsLength++] = instr;
+    AuxArrayInstrPush(instructions, instr);
   }
-  *output = instructions;
-  *outputLength = instructionsLength;
 }
 
 static inline int wrap(const int value, const int min, const int max) {
@@ -99,11 +73,11 @@ static inline void move(position *pos, const face_direction direction,
   pos->y += MOVE_POSITIONS[direction].y * amount;
 }
 
-static int solve_part1(const instruction *instructions, const size_t count) {
+static int solve_part1(const AuxArrayInstr *const instructions) {
   position pos = {0, 0};
   face_direction dir = FACE_DIR_NORTH;
-  for (size_t i = 0; i < count; ++i) {
-    const instruction *current = &instructions[i];
+  for (size_t i = 0; i < instructions->length; ++i) {
+    const instruction *current = &instructions->items[i];
     const int change = current->direction == TURN_DIR_RIGHT ? 1 : -1;
     dir = wrap(dir + change, 0, 3);
     move(&pos, dir, current->length);
@@ -120,13 +94,13 @@ static inline uint32_t hash_position(const position pos) {
   return hash;
 }
 
-static int solve_part2(const instruction *instructions, const size_t count) {
+static int solve_part2(const AuxArrayInstr *const instructions) {
   position pos = {0, 0};
   face_direction dir = FACE_DIR_NORTH;
   // sum up lengths to know how many points there can be
   size_t positionsCapacity = 0;
-  for (size_t i = 0; i < count; ++i) {
-    positionsCapacity += instructions[i].length;
+  for (size_t i = 0; i < instructions->length; ++i) {
+    positionsCapacity += instructions->items[i].length;
   }
   // add 50% extra so probing won't take too long to find empty spots
   positionsCapacity *= 1.5;
@@ -141,8 +115,8 @@ static int solve_part2(const instruction *instructions, const size_t count) {
   size_t index = hash % positionsCapacity;
   positions[index] = hash;
 
-  for (size_t i = 0; i < count; ++i) {
-    const instruction *current = &instructions[i];
+  for (size_t i = 0; i < instructions->length; ++i) {
+    const instruction *current = &instructions->items[i];
     const int change = current->direction == TURN_DIR_RIGHT ? 1 : -1;
     dir = wrap(dir + change, 0, 3);
 
@@ -169,20 +143,19 @@ done:
 int main(void) {
   char *input = NULL;
   size_t length = 0;
-  if (!read_file_to_string("day01/input.txt", &input, &length)) {
+  if (!AuxReadFileToString("day01/input.txt", &input, &length)) {
     return EXIT_FAILURE;
   }
 
-  instruction *instructions = NULL;
-  size_t instructionCount = 0;
-  parse(input, &instructions, &instructionCount);
+  AuxArrayInstr instructions;
+  parse(input, &instructions);
 
-  const int part1 = solve_part1(instructions, instructionCount);
-  const int part2 = solve_part2(instructions, instructionCount);
+  const int part1 = solve_part1(&instructions);
+  const int part2 = solve_part2(&instructions);
 
   printf("%d\n", part1);
   printf("%d\n", part2);
 
-  free(instructions);
+  AuxArrayInstrDestroy(&instructions);
   free(input);
 }
