@@ -40,8 +40,9 @@ static const position MOVE_POSITIONS[] = {
     [FACE_DIR_WEST] = {-1, 0},
 };
 
-static void parse(char *input, AuxArrayInstr *instructions) {
-  AuxArrayInstrCreate(instructions, 128);
+static AuxArrayInstr parse(char *input) {
+  AuxArrayInstr instructions;
+  AuxArrayInstrCreate(&instructions, 128);
   while (*input != '\0') {
     instruction instr = {0};
     instr.direction = *input == 'L' ? TURN_DIR_LEFT : TURN_DIR_RIGHT;
@@ -50,8 +51,9 @@ static void parse(char *input, AuxArrayInstr *instructions) {
     while (*input != '\0' && (*input == ' ' || *input == ',')) {
       input++;
     }
-    AuxArrayInstrPush(instructions, instr);
+    AuxArrayInstrPush(&instructions, instr);
   }
+  return instructions;
 }
 
 static inline int wrap(const int value, const int min, const int max) {
@@ -147,9 +149,7 @@ int main(void) {
     return EXIT_FAILURE;
   }
 
-  AuxArrayInstr instructions;
-  parse(input, &instructions);
-
+  AuxArrayInstr instructions = parse(input);
   const int part1 = solve_part1(&instructions);
   const int part2 = solve_part2(&instructions);
 
