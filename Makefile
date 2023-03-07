@@ -5,19 +5,23 @@ BIN:=bin
 AUX_SOURCES:=$(wildcard aux/*.c)
 AUX_OBJS:=$(patsubst aux/%.c, $(BIN)/%.o, $(AUX_SOURCES))
 
+ifndef verbose
+	SILENT=@
+endif
+
 aux: $(BIN) $(AUX_OBJS)
-	ar rcs $(BIN)/libaux.a $(AUX_OBJS)
+	$(SILENT) ar rcs $(BIN)/libaux.a $(AUX_OBJS)
 
 day01: $(BIN) aux
-	$(CC) $(CFLAGS) -o $(BIN)/day01 day01/main.c -Iaux -L$(BIN) -laux -lm
+	$(SILENT) $(CC) $(CFLAGS) -o $(BIN)/day01 day01/main.c -Iaux -L$(BIN) -laux -lm
 
 $(BIN)/%.o: aux/%.c
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(SILENT) $(CC) -c $(CFLAGS) $< -o $@
 
 $(BIN):
-	mkdir -p $(BIN)
+	$(SILENT) mkdir -p $(BIN)
 
 clean:
-	rm -rf ./$(BIN)/*
+	$(SILENT) rm -rf ./$(BIN)/*
 
 .PHONY: aux day01 clean
