@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <aux.h>
-#include <aux_string.h>
 
 typedef enum {
   MOVE_DIRECTION_UP,
