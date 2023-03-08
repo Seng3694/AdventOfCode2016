@@ -15,6 +15,9 @@ aux: $(BIN) $(AUX_OBJS)
 day01: $(BIN) aux
 	$(SILENT) $(CC) $(CFLAGS) -o $(BIN)/day01 day01/main.c -Iaux -L$(BIN) -laux -lm
 
+day02: $(BIN) aux
+	$(SILENT) $(CC) $(CFLAGS) -o $(BIN)/day02 day02/main.c -Iaux -L$(BIN) -laux -lm
+
 $(BIN)/%.o: aux/%.c
 	$(SILENT) $(CC) -c $(CFLAGS) $< -o $@
 
@@ -24,4 +27,4 @@ $(BIN):
 clean:
 	$(SILENT) rm -rf ./$(BIN)/*
 
-.PHONY: aux day01 clean
+.PHONY: aux day01 day02 clean
