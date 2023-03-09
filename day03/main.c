@@ -28,8 +28,20 @@ static int solve_part1(const AuxArrayTriangle *const triangles) {
   int solution = 0;
   for (size_t i = 0; i < triangles->length; ++i) {
     const triangle *const t = &triangles->items[i];
-    if (is_valid_triangle(t->a, t->b, t->c))
-      solution++;
+    solution += is_valid_triangle(t->a, t->b, t->c);
+  }
+  return solution;
+}
+
+static int solve_part2(const AuxArrayTriangle *const triangles) {
+  int solution = 0;
+  for (size_t i = 0; i < triangles->length; i += 3) {
+    const triangle *const t1 = &triangles->items[i];
+    const triangle *const t2 = &triangles->items[i + 1];
+    const triangle *const t3 = &triangles->items[i + 2];
+    solution += is_valid_triangle(t1->a, t2->a, t3->a) +
+                is_valid_triangle(t1->b, t2->b, t3->b) +
+                is_valid_triangle(t1->c, t2->c, t3->c);
   }
   return solution;
 }
@@ -39,9 +51,11 @@ int main(void) {
   AuxArrayTriangleCreate(&triangles, 2000);
   AuxReadFileLineByLine("day03/input.txt", parse_line, &triangles);
 
-  int part1 = solve_part1(&triangles);
+  const int part1 = solve_part1(&triangles);
+  const int part2 = solve_part2(&triangles);
 
   printf("%d\n", part1);
+  printf("%d\n", part2);
 
   AuxArrayTriangleDestroy(&triangles);
 }
