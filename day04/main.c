@@ -69,14 +69,41 @@ static int solve_part1(const AuxArrayRoom *const rooms) {
   return sum;
 }
 
+static inline char shift_char(const char c, const int amount) {
+  return (((c - 'a') + amount) % 26) + 'a';
+}
+
+static int solve_part2(AuxArrayRoom *const rooms) {
+  const char solution[] = "northpole object storage";
+  const size_t solutionLength = sizeof(solution) - 1;
+  for (size_t i = 0; i < rooms->length; ++i) {
+    room_data *data = &rooms->items[i];
+    const size_t length = strlen(data->name);
+    if (length != solutionLength)
+      continue;
+    const int shiftAmount = data->number % 26;
+    for (size_t j = 0; j < length; ++j) {
+      if (data->name[j] == '-')
+        data->name[j] = ' ';
+      else
+        data->name[j] = shift_char(data->name[j], shiftAmount);
+    }
+    if (memcmp(solution, data->name, length) == 0)
+      return data->number;
+  }
+  return -1;
+}
+
 int main(void) {
   AuxArrayRoom rooms;
   AuxArrayRoomCreate(&rooms, 1000);
   AuxReadFileLineByLine("day04/input.txt", parse_line, &rooms);
 
   const int part1 = solve_part1(&rooms);
+  const int part2 = solve_part2(&rooms);
 
   printf("%d\n", part1);
+  printf("%d\n", part2);
 
   AuxArrayRoomDestroy(&rooms);
 }
