@@ -46,31 +46,48 @@ static int char_info_compare(const void *const lhs, const void *const rhs) {
   return difference == 0 ? left->code - right->code : difference;
 }
 
+static inline void count_characters(const char *text, char_info *const counts) {
+  char c = 0;
+  while ((c = *text++)) {
+    if (isalpha(c))
+      counts[c - 'a'].count++;
+  }
+}
+
+static inline bool verify_checksum(const char checksum[const 5],
+                                   const char_info chars[const 5]) {
+  for (size_t i = 0; i < 5; ++i)
+    if (checksum[i] != chars[i].code)
+      return false;
+  return true;
+}
+
 static int solve_part1(const AuxArrayRoom *const rooms) {
   char_info charInfos[26] = {0};
   int sum = 0;
   for (size_t i = 0; i < rooms->length; ++i) {
     memcpy(charInfos, DEFAULT_CHAR_INFOS, sizeof(DEFAULT_CHAR_INFOS));
     const room_data *data = &rooms->items[i];
-    char c = 0;
-    const char *name = data->name;
-    while ((c = *name++)) {
-      if (isalpha(c))
-        charInfos[c - 'a'].count++;
-    }
+    count_characters(data->name, charInfos);
     qsort(charInfos, 26, sizeof(char_info), char_info_compare);
-    for (size_t j = 0; j < 5; ++j) {
-      if (data->checksum[j] != charInfos[j].code)
-        goto is_invalid;
-    }
-    sum += data->number;
-  is_invalid:;
+    if (verify_checksum(data->checksum, charInfos))
+      sum += data->number;
   }
   return sum;
 }
 
 static inline char shift_char(const char c, const int amount) {
   return (((c - 'a') + amount) % 26) + 'a';
+}
+
+static inline void decrypt(char *text, const size_t length,
+                           const size_t shift) {
+  for (size_t i = 0; i < length; ++i) {
+    if (text[i] == '-')
+      text[i] = ' ';
+    else
+      text[i] = shift_char(text[i], shift);
+  }
 }
 
 static int solve_part2(AuxArrayRoom *const rooms) {
@@ -82,12 +99,7 @@ static int solve_part2(AuxArrayRoom *const rooms) {
     if (length != solutionLength)
       continue;
     const int shiftAmount = data->number % 26;
-    for (size_t j = 0; j < length; ++j) {
-      if (data->name[j] == '-')
-        data->name[j] = ' ';
-      else
-        data->name[j] = shift_char(data->name[j], shiftAmount);
-    }
+    decrypt(data->name, length, shiftAmount);
     if (memcmp(solution, data->name, length) == 0)
       return data->number;
   }
