@@ -1,5 +1,6 @@
 CC:=gcc
 CFLAGS:=-g -O0 -Wall -std=c99 -fsanitize=address -fsanitize=undefined
+# CFLAGS:=-O3 -Wall -std=c99 -DNDEBUG
 BIN:=bin
 
 AUX_SOURCES:=$(wildcard aux/*.c)
@@ -24,6 +25,9 @@ day03: $(BIN) aux
 day04: $(BIN) aux
 	$(SILENT) $(CC) $(CFLAGS) -o $(BIN)/day04 day04/main.c -Iaux -L$(BIN) -laux -lm
 
+day05: $(BIN) aux
+	$(SILENT) $(CC) $(CFLAGS) -o $(BIN)/day05 day05/main.c -Iaux -L$(BIN) -laux -lm
+
 $(BIN)/%.o: aux/%.c
 	$(SILENT) $(CC) -c $(CFLAGS) $< -o $@
 
@@ -33,4 +37,4 @@ $(BIN):
 clean:
 	$(SILENT) rm -rf ./$(BIN)/*
 
-.PHONY: aux day01 day02 day03 clean
+.PHONY: aux day01 day02 day03 day04 day05 clean
