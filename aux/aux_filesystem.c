@@ -38,8 +38,11 @@ bool AuxReadFileToString(const char *path, char **output, size_t *length) {
     return false;
   }
   content[size] = '\0';
-  fread(content, size, 1, file);
+  const size_t bytesRead = fread(content, size, 1, file);
   fclose(file);
+  if (bytesRead != size)
+    return false;
+
   *output = content;
   return true;
 }
