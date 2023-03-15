@@ -64,8 +64,9 @@ static void parse_line(char *line, size_t length, void *userData) {
 
 static void print_screen(const screen *const s) {
   for (uint8_t y = 0; y < s->height; ++y) {
+    const size_t rowOffset = y * s->width;
     for (uint8_t x = 0; x < s->width; ++x) {
-      uint8_t v = s->data[y * s->width + x];
+      uint8_t v = s->data[rowOffset + x];
       printf("%c", v == 0 ? '.' : '#');
     }
     printf("\n");
