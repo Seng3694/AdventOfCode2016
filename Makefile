@@ -34,6 +34,9 @@ day06: $(BIN) aux
 day07: $(BIN) aux
 	$(SILENT) $(CC) $(CFLAGS) -o $(BIN)/day07 day07/main.c -Iaux -L$(BIN) -laux -lm
 
+day08: $(BIN) aux
+	$(SILENT) $(CC) $(CFLAGS) -o $(BIN)/day08 day08/main.c -Iaux -L$(BIN) -laux -lm
+
 $(BIN)/%.o: aux/%.c
 	$(SILENT) $(CC) -c $(CFLAGS) $< -o $@
 
