@@ -35,19 +35,13 @@ static void print_token(const char *const input, const token *const t) {
          t->data.start, t->data.start - input, t->data.length);
 }
 
-static char *parse_text(char *s, const size_t minLength,
-                        AuxArrayToken *const tokens) {
+static char *parse_text(char *s, AuxArrayToken *const tokens) {
   token t = {
       .type = TOKEN_TYPE_TEXT,
       .data = {.start = s},
   };
-  if (minLength == 0) {
-    while (isupper(*s))
-      s++;
-  } else {
-    s += minLength;
-  }
-
+  while (isupper(*s))
+    s++;
   t.data.length = s - t.data.start;
   AuxArrayTokenPush(tokens, t);
   return s;
@@ -65,12 +59,10 @@ static char *parse_marker(char *s, AuxArrayToken *const tokens) {
   s++;
   t.data.length = s - t.data.start;
   AuxArrayTokenPush(tokens, t);
-  return parse_text(s, t.marker.length, tokens);
+  return s;
 }
 
-static void parse(char *input, const size_t length,
-                  AuxArrayToken *const tokens) {
-  char *s = input;
+static void parse(char *s, AuxArrayToken *const tokens) {
   while (*s) {
     switch (*s) {
     case '(': {
@@ -78,28 +70,33 @@ static void parse(char *input, const size_t length,
       break;
     }
     default: {
-      s = parse_text(s, 0, tokens);
+      s = parse_text(s, tokens);
       break;
     }
     }
-
     while (isspace(*s))
       s++;
   }
 }
 
-static size_t solve_part1(const AuxArrayToken *const tokens) {
-  size_t length = 0;
+static int32_t solve_part1(const AuxArrayToken *const tokens) {
+  int32_t solution = 0;
   for (size_t i = 0; i < tokens->length; ++i) {
-    const token *const t = &tokens->items[i];
+    const token *t = &tokens->items[i];
     if (t->type == TOKEN_TYPE_MARKER) {
-      length += (t->marker.length * t->marker.frequency);
-      i++; // skip next text
+      solution += t->marker.frequency * t->marker.length;
+      int32_t skip = t->marker.length;
+      while (i < tokens->length && skip > 0) {
+        i++;
+        t = &tokens->items[i];
+        skip -= t->data.length;
+      }
+      solution -= skip;
     } else {
-      length += t->data.length;
+      solution += t->data.length;
     }
   }
-  return length;
+  return solution;
 }
 
 int main(void) {
@@ -112,11 +109,11 @@ int main(void) {
   AuxArrayToken tokens;
   AuxArrayTokenCreate(&tokens, 640);
 
-  parse(input, length, &tokens);
+  parse(input, &tokens);
 
-  const size_t part1 = solve_part1(&tokens);
+  const int32_t part1 = solve_part1(&tokens);
 
-  printf("%zu\n", part1);
+  printf("%d\n", part1);
 
   AuxArrayTokenDestroy(&tokens);
   free(input);
