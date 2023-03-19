@@ -1,102 +1,50 @@
 #include <aux.h>
-#include <ctype.h>
-#include <string.h>
+#include <stdlib.h>
 
-typedef struct {
-  char *start;
-  size_t length;
-} slice;
-
-typedef enum {
-  TOKEN_TYPE_TEXT,
-  TOKEN_TYPE_MARKER,
-} token_type;
-
-typedef struct {
-  uint16_t length;
-  uint16_t frequency;
-} marker_data;
-
-typedef struct {
-  slice data;
-  marker_data marker;
-  token_type type;
-} token;
-
-#define ARRAY_T token
-#define ARRAY_T_NAME Token
-#include <aux_array.h>
-
-static void print_token(const char *const input, const token *const t) {
-  printf("type: %s\n", t->type == TOKEN_TYPE_MARKER ? "MARKER" : "TEXT");
-  if (t->type == TOKEN_TYPE_MARKER)
-    printf("marker: %u x %u\n", t->marker.length, t->marker.frequency);
-  printf("slice: '%.*s' index=%zu length=%zu\n\n", (int)t->data.length,
-         t->data.start, t->data.start - input, t->data.length);
+static inline char *parse_marker(char *input, int32_t *markerLength,
+                                 int32_t *repetition) {
+  input++; // (
+  *markerLength = strtol(input, &input, 10);
+  input++; // x
+  *repetition = strtol(input, &input, 10);
+  input++; // )
+  return input;
 }
 
-static char *parse_text(char *s, AuxArrayToken *const tokens) {
-  token t = {
-      .type = TOKEN_TYPE_TEXT,
-      .data = {.start = s},
-  };
-  while (isupper(*s))
-    s++;
-  t.data.length = s - t.data.start;
-  AuxArrayTokenPush(tokens, t);
-  return s;
-}
-
-static char *parse_marker(char *s, AuxArrayToken *const tokens) {
-  token t = {
-      .type = TOKEN_TYPE_MARKER,
-      .data = {.start = s},
-  };
-  s++;
-  t.marker.length = strtol(s, &s, 10);
-  s++; // skip x
-  t.marker.frequency = strtol(s, &s, 10);
-  s++;
-  t.data.length = s - t.data.start;
-  AuxArrayTokenPush(tokens, t);
-  return s;
-}
-
-static void parse(char *s, AuxArrayToken *const tokens) {
-  while (*s) {
-    switch (*s) {
-    case '(': {
-      s = parse_marker(s, tokens);
-      break;
-    }
-    default: {
-      s = parse_text(s, tokens);
-      break;
-    }
-    }
-    while (isspace(*s))
-      s++;
-  }
-}
-
-static int32_t solve_part1(const AuxArrayToken *const tokens) {
-  int32_t solution = 0;
-  for (size_t i = 0; i < tokens->length; ++i) {
-    const token *t = &tokens->items[i];
-    if (t->type == TOKEN_TYPE_MARKER) {
-      solution += t->marker.frequency * t->marker.length;
-      int32_t skip = t->marker.length;
-      while (i < tokens->length && skip > 0) {
-        i++;
-        t = &tokens->items[i];
-        skip -= t->data.length;
-      }
-      solution -= skip;
+static size_t solve_part1(char *input, const size_t length) {
+  char *s = input;
+  size_t result = 0;
+  while ((s - input) < length) {
+    if (*s == '(') {
+      int32_t markerLength, repetition;
+      s = parse_marker(s, &markerLength, &repetition);
+      result += markerLength * repetition;
+      s += markerLength;
     } else {
-      solution += t->data.length;
+      // this case doesn't happen for the actual input but it's defined in the
+      // examples
+      s++;
+      result++;
     }
   }
-  return solution;
+  return result;
+}
+
+static size_t solve_part2(char *input, const size_t length) {
+  char *s = input;
+  size_t result = 0;
+  while ((s - input) < length) {
+    if (*s != '(') {
+      s++;
+      result++;
+    } else {
+      int32_t markerLength, repetition;
+      s = parse_marker(s, &markerLength, &repetition);
+      result += solve_part2(s, markerLength) * repetition;
+      s += markerLength;
+    }
+  }
+  return result;
 }
 
 int main(void) {
@@ -105,16 +53,13 @@ int main(void) {
   if (!AuxReadFileToString("day09/input.txt", &input, &length)) {
     return EXIT_FAILURE;
   }
+  AuxRemoveTrailingWhitespace(input, &length);
 
-  AuxArrayToken tokens;
-  AuxArrayTokenCreate(&tokens, 640);
+  const size_t part1 = solve_part1(input, length);
+  const size_t part2 = solve_part2(input, length);
 
-  parse(input, &tokens);
+  printf("%zu\n", part1);
+  printf("%zu\n", part2);
 
-  const int32_t part1 = solve_part1(&tokens);
-
-  printf("%d\n", part1);
-
-  AuxArrayTokenDestroy(&tokens);
   free(input);
 }
