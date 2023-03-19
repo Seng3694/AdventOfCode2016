@@ -43,7 +43,7 @@ bool AuxReadFileToString(const char *path, char **output, size_t *length) {
   if (blocksRead != 1) {
     return false;
   }
-
+  *length = size;
   *output = content;
   return true;
 }
