@@ -118,7 +118,8 @@ static void init_active(context *const ctx) {
   }
 }
 
-static uint8_t solve_part1(context *const ctx) {
+static void solve_both_parts(context *const ctx, uint8_t *part1,
+                             uint32_t *part2) {
   reset_bots(ctx);
   init_active(ctx);
   uint8_t output[32] = {0};
@@ -126,9 +127,9 @@ static uint8_t solve_part1(context *const ctx) {
   while (ctx->activeCount > 0) {
     for (int32_t i = (int32_t)ctx->activeCount - 1; i >= 0; --i) {
       bot *const src = ctx->active[i];
-      if (is_bot_17_61(src))
-        return src->id;
-
+      if (is_bot_17_61(src)) {
+        *part1 = src->id;
+      }
       switch (src->instr.type) {
       case INSTR_TYPE_LOW_HIGH_TO_BOT: {
         bot *const low = &ctx->bots[src->instr.toLow];
@@ -157,14 +158,17 @@ static uint8_t solve_part1(context *const ctx) {
       disable_bot(ctx, i);
     }
   }
-
-  return 0xff; // should never reach
+  *part2 = output[0] * output[1] * output[2];
 }
 
 int main(void) {
   context ctx = {0};
   AuxReadFileLineByLine("day10/input.txt", parse_line, &ctx);
 
-  const uint8_t part1 = solve_part1(&ctx);
+  uint8_t part1 = 0;
+  uint32_t part2 = 0;
+  solve_both_parts(&ctx, &part1, &part2);
+
   printf("%u\n", part1);
+  printf("%u\n", part2);
 }
