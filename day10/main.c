@@ -24,7 +24,6 @@ typedef struct {
 #define BOT_MAX 256
 
 typedef struct {
-  bot initialState[BOT_MAX];
   bot bots[BOT_MAX];
   bot *active[BOT_MAX];
   size_t activeCount;
@@ -65,7 +64,7 @@ static void parse_line(char *line, size_t length, void *userData) {
     // example: "bot 173 gives low to bot 83 and high to bot 202"
     line += 4; // skip "bot"
     const uint8_t botId = (uint8_t)strtol(line, &line, 10);
-    bot *const b = ctx->initialState + botId;
+    bot *const b = ctx->bots + botId;
     b->id = botId;
     line += 14; // skip " gives low to "
     if (memcmp(line, "bot", 3) == 0) {
@@ -94,12 +93,8 @@ static void parse_line(char *line, size_t length, void *userData) {
     const uint8_t value = (uint8_t)strtol(line, &line, 10);
     line += 13; // skip " goes to bot "
     const uint8_t botId = (uint8_t)strtol(line, NULL, 10);
-    give_value_to_bot(ctx->initialState + botId, value);
+    give_value_to_bot(ctx->bots + botId, value);
   }
-}
-
-static inline void reset_bots(context *const ctx) {
-  memcpy(ctx->bots, ctx->initialState, sizeof(bot) * BOT_MAX);
 }
 
 static inline void disable_bot(context *const ctx, const size_t index) {
@@ -120,7 +115,6 @@ static void init_active(context *const ctx) {
 
 static void solve_both_parts(context *const ctx, uint8_t *part1,
                              uint32_t *part2) {
-  reset_bots(ctx);
   init_active(ctx);
   uint8_t output[32] = {0};
 
