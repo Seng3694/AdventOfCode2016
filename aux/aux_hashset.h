@@ -104,8 +104,6 @@ HS_LINKAGE void HS_ADJUST_CAP(HS_NAME *hs, const HS_SIZE_T capacity) {
   hs->capacity = capacity;
 }
 
-#include <aux.h>
-
 HS_LINKAGE void HS_INSERT_INTERNAL(AUX_T *entries, const HS_SIZE_T capacity,
                                    const AUX_T key, const uint32_t *hash) {
   const uint32_t keyHash = hash ? *hash : AUX_T_HFUNC(&key);
