@@ -52,6 +52,7 @@ typedef struct {
 #define HS_INSERT_PH HS_IMPL(InsertPreHashed)
 #define HS_REMOVE HS_IMPL(Remove)
 #define HS_REMOVE_PH HS_IMPL(RemovePreHashed)
+#define HS_CLEAR HS_IMPL(Clear)
 #define HS_CONTAINS HS_IMPL(Contains)
 
 HS_LINKAGE void HS_CREATE(HS_NAME *const hs, const HS_SIZE_T capacity);
@@ -67,6 +68,8 @@ HS_LINKAGE void HS_INSERT_PH(HS_NAME *const hs, const AUX_T key,
 HS_LINKAGE void HS_REMOVE(HS_NAME *const hs, const AUX_T key);
 HS_LINKAGE void HS_REMOVE_PH(HS_NAME *const hs, const AUX_T key,
                              const uint32_t hash);
+
+HS_LINKAGE void HS_CLEAR(HS_NAME *const hs);
 
 HS_LINKAGE bool HS_CONTAINS(const HS_NAME *const hs, const AUX_T key,
                             uint32_t *hash);
@@ -158,6 +161,13 @@ HS_LINKAGE void HS_REMOVE_PH(HS_NAME *const hs, const AUX_T key,
   }
 }
 
+HS_LINKAGE void HS_CLEAR(HS_NAME *const hs) {
+  for (HS_SIZE_T i = 0; i < hs->capacity; ++i) {
+    hs->entries[i] = AUX_T_EMPTY;
+  }
+  hs->count = 0;
+}
+
 HS_LINKAGE bool HS_CONTAINS(const HS_NAME *const hs, const AUX_T key,
                             uint32_t *hash) {
   const uint32_t keyHash = AUX_T_HFUNC(&key);
@@ -195,4 +205,5 @@ HS_LINKAGE bool HS_CONTAINS(const HS_NAME *const hs, const AUX_T key,
 #undef HS_INSERT_PH
 #undef HS_REMOVE
 #undef HS_REMOVE_PH
+#undef HS_CLEAR
 #undef HS_CONTAINS
