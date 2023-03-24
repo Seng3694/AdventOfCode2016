@@ -380,5 +380,19 @@ int main(void) {
   AuxReadFileLineByLine("day11/input.txt", parse_line, &ctx);
 
   const uint32_t part1 = solve(&fac, &md);
+
+  fac.floors[0].chips = AUX_SET_BIT(fac.floors[0].chips, md.materialCount);
+  fac.floors[0].generators =
+      AUX_SET_BIT(fac.floors[0].generators, md.materialCount);
+  memcpy(&md.materials[md.materialCount++], "elerium", 8);
+
+  fac.floors[0].chips = AUX_SET_BIT(fac.floors[0].chips, md.materialCount);
+  fac.floors[0].generators =
+      AUX_SET_BIT(fac.floors[0].generators, md.materialCount);
+  memcpy(&md.materials[md.materialCount++], "dilithium", 10);
+
+  const uint32_t part2 = solve(&fac, &md);
+
   printf("%u\n", part1);
+  printf("%u\n", part2);
 }
