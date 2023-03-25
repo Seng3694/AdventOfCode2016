@@ -6,6 +6,7 @@
 #define MATERIAL_TYPES 8 // only 5 in inputs
 #define FLOOR_COUNT 4
 
+#ifndef NDEBUG
 static const char *G_COLORS[] = {
     "\e[0;31m", "\e[0;32m", "\e[0;33m", "\e[0;34m",
     "\e[0;35m", "\e[0;36m", "\e[0;37m",
@@ -15,6 +16,7 @@ static const char *MC_COLORS[] = {
     "\e[1;31m", "\e[1;32m", "\e[1;33m", "\e[1;34m",
     "\e[1;35m", "\e[1;36m", "\e[1;37m",
 };
+#endif
 
 typedef struct {
   uint8_t generators;
@@ -41,23 +43,26 @@ static const facility EMPTY_FAC = {0};
 
 static uint32_t calc_facility_hash(const facility *const fac) {
   uint32_t hash = 2166136261u;
-  for (size_t i = 0; i < FLOOR_COUNT; ++i) {
-    hash ^= fac->floors[i].chips;
-    hash *= 16777619;
-    hash ^= fac->floors[i].generators;
-    hash *= 57620617;
+  for (size_t i = 0; i < MATERIAL_TYPES; ++i) {
+    uint32_t matHash = 58246577;
+    for (size_t j = 0; j < FLOOR_COUNT; ++j) {
+      if (AUX_CHECK_BIT(fac->floors[j].chips, i)) {
+        matHash ^= j * 16777619;
+      }
+      if (AUX_CHECK_BIT(fac->floors[j].generators, i)) {
+        matHash ^= j * 57620617;
+      }
+    }
+    hash += matHash * 13798559;
   }
   hash ^= fac->elevator;
   hash *= 24056203;
   return hash;
 }
 
-static bool facility_equals(const facility *const a, const facility *const b) {
-  for (size_t i = 0; i < FLOOR_COUNT; ++i)
-    if (a->floors[i].chips != b->floors[i].chips ||
-        a->floors[i].generators != b->floors[i].generators)
-      return false;
-  return a->elevator == b->elevator;
+static inline bool facility_equals(const facility *const a,
+                                   const facility *const b) {
+  return calc_facility_hash(a) == calc_facility_hash(b);
 }
 
 #define AUX_T facility
@@ -121,6 +126,7 @@ finish:
   ctx->currentFloor++;
 }
 
+#ifndef NDEBUG
 static void print_facility(const facility *const fac,
                            const material_data *const md) {
   for (uint8_t i = FLOOR_COUNT - 1; i >= 0; --i) {
@@ -142,6 +148,10 @@ static void print_facility(const facility *const fac,
   }
   printf("\n");
 }
+#define PRINT_FAC(fac, md) print_facility(fac, md)
+#else
+#define PRINT_FAC(fac, md)
+#endif
 
 static bool is_valid_floor(const floor *const f, const uint8_t materialCount) {
   for (uint8_t i = 0; i < materialCount; ++i) {
@@ -311,6 +321,7 @@ static void get_valid_actions(const facility *const state, AuxArrayFac *actions,
 
 static uint32_t solve(const facility *const startingFacility,
                       const material_data *md) {
+  PRINT_FAC(startingFacility, md);
   facility destination = {
       .elevator = 3,
   };
