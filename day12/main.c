@@ -130,10 +130,9 @@ static inline int32_t dec(int32_t *const r) {
   return 1;
 }
 
-static int32_t solve_part1(const AuxArrayInstr *const instructions) {
+static void run(const AuxArrayInstr *const instructions, registers *const r) {
   const instruction *const instr = instructions->items;
   int32_t pc = 0;
-  registers r = {0};
   const instruction *current = &instr[pc];
 
   do {
@@ -141,109 +140,107 @@ static int32_t solve_part1(const AuxArrayInstr *const instructions) {
     case INSTR_TYPE_NOP:
       break;
     case INSTR_TYPE_CPY_I_A:
-      pc += cpy(&r.a, current->operand1);
+      pc += cpy(&r->a, current->operand1);
       break;
     case INSTR_TYPE_CPY_I_B:
-      pc += cpy(&r.b, current->operand1);
+      pc += cpy(&r->b, current->operand1);
       break;
     case INSTR_TYPE_CPY_I_C:
-      pc += cpy(&r.c, current->operand1);
+      pc += cpy(&r->c, current->operand1);
       break;
     case INSTR_TYPE_CPY_I_D:
-      pc += cpy(&r.d, current->operand1);
+      pc += cpy(&r->d, current->operand1);
       break;
     case INSTR_TYPE_CPY_A_A:
-      pc += cpy(&r.a, r.a);
+      pc += cpy(&r->a, r->a);
       break;
     case INSTR_TYPE_CPY_A_B:
-      pc += cpy(&r.b, r.a);
+      pc += cpy(&r->b, r->a);
       break;
     case INSTR_TYPE_CPY_A_C:
-      pc += cpy(&r.c, r.a);
+      pc += cpy(&r->c, r->a);
       break;
     case INSTR_TYPE_CPY_A_D:
-      pc += cpy(&r.d, r.a);
+      pc += cpy(&r->d, r->a);
       break;
     case INSTR_TYPE_CPY_B_A:
-      pc += cpy(&r.a, r.b);
+      pc += cpy(&r->a, r->b);
       break;
     case INSTR_TYPE_CPY_B_B:
-      pc += cpy(&r.b, r.b);
+      pc += cpy(&r->b, r->b);
       break;
     case INSTR_TYPE_CPY_B_C:
-      pc += cpy(&r.c, r.b);
+      pc += cpy(&r->c, r->b);
       break;
     case INSTR_TYPE_CPY_B_D:
-      pc += cpy(&r.d, r.b);
+      pc += cpy(&r->d, r->b);
       break;
     case INSTR_TYPE_CPY_C_A:
-      pc += cpy(&r.a, r.c);
+      pc += cpy(&r->a, r->c);
       break;
     case INSTR_TYPE_CPY_C_B:
-      pc += cpy(&r.b, r.c);
+      pc += cpy(&r->b, r->c);
       break;
     case INSTR_TYPE_CPY_C_C:
-      pc += cpy(&r.c, r.c);
+      pc += cpy(&r->c, r->c);
       break;
     case INSTR_TYPE_CPY_C_D:
-      pc += cpy(&r.d, r.c);
+      pc += cpy(&r->d, r->c);
       break;
     case INSTR_TYPE_CPY_D_A:
-      pc += cpy(&r.a, r.d);
+      pc += cpy(&r->a, r->d);
       break;
     case INSTR_TYPE_CPY_D_B:
-      pc += cpy(&r.b, r.d);
+      pc += cpy(&r->b, r->d);
       break;
     case INSTR_TYPE_CPY_D_C:
-      pc += cpy(&r.c, r.d);
+      pc += cpy(&r->c, r->d);
       break;
     case INSTR_TYPE_CPY_D_D:
-      pc += cpy(&r.d, r.d);
+      pc += cpy(&r->d, r->d);
       break;
     case INSTR_TYPE_INC_A:
-      pc += inc(&r.a);
+      pc += inc(&r->a);
       break;
     case INSTR_TYPE_INC_B:
-      pc += inc(&r.b);
+      pc += inc(&r->b);
       break;
     case INSTR_TYPE_INC_C:
-      pc += inc(&r.c);
+      pc += inc(&r->c);
       break;
     case INSTR_TYPE_INC_D:
-      pc += inc(&r.d);
+      pc += inc(&r->d);
       break;
     case INSTR_TYPE_DEC_A:
-      pc += dec(&r.a);
+      pc += dec(&r->a);
       break;
     case INSTR_TYPE_DEC_B:
-      pc += dec(&r.b);
+      pc += dec(&r->b);
       break;
     case INSTR_TYPE_DEC_C:
-      pc += dec(&r.c);
+      pc += dec(&r->c);
       break;
     case INSTR_TYPE_DEC_D:
-      pc += dec(&r.d);
+      pc += dec(&r->d);
       break;
     case INSTR_TYPE_JNZ_I_I:
       pc += jnz(current->operand1, current->operand2);
       break;
     case INSTR_TYPE_JNZ_A_I:
-      pc += jnz(r.a, current->operand2);
+      pc += jnz(r->a, current->operand2);
       break;
     case INSTR_TYPE_JNZ_B_I:
-      pc += jnz(r.b, current->operand2);
+      pc += jnz(r->b, current->operand2);
       break;
     case INSTR_TYPE_JNZ_C_I:
-      pc += jnz(r.c, current->operand2);
+      pc += jnz(r->c, current->operand2);
       break;
     case INSTR_TYPE_JNZ_D_I:
-      pc += jnz(r.d, current->operand2);
+      pc += jnz(r->d, current->operand2);
       break;
     }
     current = &instr[pc];
   } while (current->type != INSTR_TYPE_NOP);
-
-  return r.a;
 }
 
 int main(void) {
@@ -252,9 +249,16 @@ int main(void) {
   AuxReadFileLineByLine("day12/input.txt", parse_line, &instructions);
   AuxArrayInstrPush(&instructions, (instruction){.type = INSTR_TYPE_NOP});
 
-  const int32_t part1 = solve_part1(&instructions);
+  registers r = {0};
+  run(&instructions, &r);
+  const int32_t part1 = r.a;
+
+  r = (registers){.c = 1};
+  run(&instructions, &r);
+  const int32_t part2 = r.a;
 
   printf("%d\n", part1);
+  printf("%d\n", part2);
 
   AuxArrayInstrDestroy(&instructions);
 }
