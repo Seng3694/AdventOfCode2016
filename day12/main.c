@@ -115,132 +115,142 @@ static inline int32_t jnz(const int32_t x, const int32_t y) {
   return x != 0 ? y : 1;
 }
 
-static inline int32_t cpy(int32_t *const r, const int32_t value) {
+static inline void cpy(int32_t *const r, const int32_t value) {
   *r = value;
-  return 1;
 }
 
-static inline int32_t inc(int32_t *const r) {
+static inline void inc(int32_t *const r) {
   ++(*r);
-  return 1;
 }
 
-static inline int32_t dec(int32_t *const r) {
+static inline void dec(int32_t *const r) {
   --(*r);
-  return 1;
 }
 
 static void run(const AuxArrayInstr *const instructions, registers *const r) {
   const instruction *const instr = instructions->items;
-  int32_t pc = 0;
-  const instruction *current = &instr[pc];
+  int32_t pc = -1;
 
-  do {
-    switch (current->type) {
-    case INSTR_TYPE_NOP:
-      break;
-    case INSTR_TYPE_CPY_I_A:
-      pc += cpy(&r->a, current->operand1);
-      break;
-    case INSTR_TYPE_CPY_I_B:
-      pc += cpy(&r->b, current->operand1);
-      break;
-    case INSTR_TYPE_CPY_I_C:
-      pc += cpy(&r->c, current->operand1);
-      break;
-    case INSTR_TYPE_CPY_I_D:
-      pc += cpy(&r->d, current->operand1);
-      break;
-    case INSTR_TYPE_CPY_A_A:
-      pc += cpy(&r->a, r->a);
-      break;
-    case INSTR_TYPE_CPY_A_B:
-      pc += cpy(&r->b, r->a);
-      break;
-    case INSTR_TYPE_CPY_A_C:
-      pc += cpy(&r->c, r->a);
-      break;
-    case INSTR_TYPE_CPY_A_D:
-      pc += cpy(&r->d, r->a);
-      break;
-    case INSTR_TYPE_CPY_B_A:
-      pc += cpy(&r->a, r->b);
-      break;
-    case INSTR_TYPE_CPY_B_B:
-      pc += cpy(&r->b, r->b);
-      break;
-    case INSTR_TYPE_CPY_B_C:
-      pc += cpy(&r->c, r->b);
-      break;
-    case INSTR_TYPE_CPY_B_D:
-      pc += cpy(&r->d, r->b);
-      break;
-    case INSTR_TYPE_CPY_C_A:
-      pc += cpy(&r->a, r->c);
-      break;
-    case INSTR_TYPE_CPY_C_B:
-      pc += cpy(&r->b, r->c);
-      break;
-    case INSTR_TYPE_CPY_C_C:
-      pc += cpy(&r->c, r->c);
-      break;
-    case INSTR_TYPE_CPY_C_D:
-      pc += cpy(&r->d, r->c);
-      break;
-    case INSTR_TYPE_CPY_D_A:
-      pc += cpy(&r->a, r->d);
-      break;
-    case INSTR_TYPE_CPY_D_B:
-      pc += cpy(&r->b, r->d);
-      break;
-    case INSTR_TYPE_CPY_D_C:
-      pc += cpy(&r->c, r->d);
-      break;
-    case INSTR_TYPE_CPY_D_D:
-      pc += cpy(&r->d, r->d);
-      break;
-    case INSTR_TYPE_INC_A:
-      pc += inc(&r->a);
-      break;
-    case INSTR_TYPE_INC_B:
-      pc += inc(&r->b);
-      break;
-    case INSTR_TYPE_INC_C:
-      pc += inc(&r->c);
-      break;
-    case INSTR_TYPE_INC_D:
-      pc += inc(&r->d);
-      break;
-    case INSTR_TYPE_DEC_A:
-      pc += dec(&r->a);
-      break;
-    case INSTR_TYPE_DEC_B:
-      pc += dec(&r->b);
-      break;
-    case INSTR_TYPE_DEC_C:
-      pc += dec(&r->c);
-      break;
-    case INSTR_TYPE_DEC_D:
-      pc += dec(&r->d);
-      break;
-    case INSTR_TYPE_JNZ_I_I:
-      pc += jnz(current->operand1, current->operand2);
-      break;
-    case INSTR_TYPE_JNZ_A_I:
-      pc += jnz(r->a, current->operand2);
-      break;
-    case INSTR_TYPE_JNZ_B_I:
-      pc += jnz(r->b, current->operand2);
-      break;
-    case INSTR_TYPE_JNZ_C_I:
-      pc += jnz(r->c, current->operand2);
-      break;
-    case INSTR_TYPE_JNZ_D_I:
-      pc += jnz(r->d, current->operand2);
-      break;
-    }
-    current = &instr[pc];
-  } while (current->type != INSTR_TYPE_NOP);
+  static void *dispatchTable[] = {
+      &&instr_nop,     &&instr_cpy_i_a, &&instr_cpy_i_b, &&instr_cpy_i_c,
+      &&instr_cpy_i_d, &&instr_cpy_a_a, &&instr_cpy_a_b, &&instr_cpy_a_c,
+      &&instr_cpy_a_d, &&instr_cpy_b_a, &&instr_cpy_b_b, &&instr_cpy_b_c,
+      &&instr_cpy_b_d, &&instr_cpy_c_a, &&instr_cpy_c_b, &&instr_cpy_c_c,
+      &&instr_cpy_c_d, &&instr_cpy_d_a, &&instr_cpy_d_b, &&instr_cpy_d_c,
+      &&instr_cpy_d_d, &&instr_inc_a,   &&instr_inc_b,   &&instr_inc_c,
+      &&instr_inc_d,   &&instr_dec_a,   &&instr_dec_b,   &&instr_dec_c,
+      &&instr_dec_d,   &&instr_jnz_i_i, &&instr_jnz_a_i, &&instr_jnz_b_i,
+      &&instr_jnz_c_i, &&instr_jnz_d_i,
+  };
+
+#define DISPATCH() goto *dispatchTable[instr[++pc].type]
+
+  DISPATCH();
+  for (;;) {
+  instr_nop:
+    break;
+  instr_cpy_i_a:
+    cpy(&r->a, instr[pc].operand1);
+    DISPATCH();
+  instr_cpy_i_b:
+    cpy(&r->b, instr[pc].operand1);
+    DISPATCH();
+  instr_cpy_i_c:
+    cpy(&r->c, instr[pc].operand1);
+    DISPATCH();
+  instr_cpy_i_d:
+    cpy(&r->d, instr[pc].operand1);
+    DISPATCH();
+  instr_cpy_a_a:
+    cpy(&r->a, r->a);
+    DISPATCH();
+  instr_cpy_a_b:
+    cpy(&r->b, r->a);
+    DISPATCH();
+  instr_cpy_a_c:
+    cpy(&r->c, r->a);
+    DISPATCH();
+  instr_cpy_a_d:
+    cpy(&r->d, r->a);
+    DISPATCH();
+  instr_cpy_b_a:
+    cpy(&r->a, r->b);
+    DISPATCH();
+  instr_cpy_b_b:
+    cpy(&r->b, r->b);
+    DISPATCH();
+  instr_cpy_b_c:
+    cpy(&r->c, r->b);
+    DISPATCH();
+  instr_cpy_b_d:
+    cpy(&r->d, r->b);
+    DISPATCH();
+  instr_cpy_c_a:
+    cpy(&r->a, r->c);
+    DISPATCH();
+  instr_cpy_c_b:
+    cpy(&r->b, r->c);
+    DISPATCH();
+  instr_cpy_c_c:
+    cpy(&r->c, r->c);
+    DISPATCH();
+  instr_cpy_c_d:
+    cpy(&r->d, r->c);
+    DISPATCH();
+  instr_cpy_d_a:
+    cpy(&r->a, r->d);
+    DISPATCH();
+  instr_cpy_d_b:
+    cpy(&r->b, r->d);
+    DISPATCH();
+  instr_cpy_d_c:
+    cpy(&r->c, r->d);
+    DISPATCH();
+  instr_cpy_d_d:
+    cpy(&r->d, r->d);
+    DISPATCH();
+  instr_inc_a:
+    inc(&r->a);
+    DISPATCH();
+  instr_inc_b:
+    inc(&r->b);
+    DISPATCH();
+  instr_inc_c:
+    inc(&r->c);
+    DISPATCH();
+  instr_inc_d:
+    inc(&r->d);
+    DISPATCH();
+  instr_dec_a:
+    dec(&r->a);
+    DISPATCH();
+  instr_dec_b:
+    dec(&r->b);
+    DISPATCH();
+  instr_dec_c:
+    dec(&r->c);
+    DISPATCH();
+  instr_dec_d:
+    dec(&r->d);
+    DISPATCH();
+  instr_jnz_i_i:
+    pc += jnz(instr[pc].operand1, instr[pc].operand2) - 1;
+    DISPATCH();
+  instr_jnz_a_i:
+    pc += jnz(r->a, instr[pc].operand2) - 1;
+    DISPATCH();
+  instr_jnz_b_i:
+    pc += jnz(r->b, instr[pc].operand2) - 1;
+    DISPATCH();
+  instr_jnz_c_i:
+    pc += jnz(r->c, instr[pc].operand2) - 1;
+    DISPATCH();
+  instr_jnz_d_i:
+    pc += jnz(r->d, instr[pc].operand2) - 1;
+    DISPATCH();
+  }
+
+#undef DISPATCH
 }
 
 int main(void) {
