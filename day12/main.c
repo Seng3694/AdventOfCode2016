@@ -82,22 +82,6 @@ static void parse_line(char *line, size_t length, void *userData) {
   AuxArrayInstrPush(instructions, instr);
 }
 
-static inline int32_t jnz(const int32_t x, const int32_t y) {
-  return x != 0 ? y : 1;
-}
-
-static inline void cpy(int32_t *const r, const int32_t value) {
-  *r = value;
-}
-
-static inline void inc(int32_t *const r) {
-  ++(*r);
-}
-
-static inline void dec(int32_t *const r) {
-  --(*r);
-}
-
 static void run(const AuxArrayInstr *const instructions, registers *const r) {
   const instruction *const instr = instructions->items;
   register int32_t pc = -1;
@@ -108,112 +92,65 @@ static void run(const AuxArrayInstr *const instructions, registers *const r) {
 
 #define DISPATCH() goto *dispatchTable[instr[++pc].type]
 
+#define CPY(dst, value)                                                        \
+  dst = value;                                                                 \
+  DISPATCH()
+
+#define INC(dst)                                                               \
+  dst++;                                                                       \
+  DISPATCH()
+
+#define DEC(dst)                                                               \
+  dst--;                                                                       \
+  DISPATCH()
+
+#define JNZ(op1, op2)                                                          \
+  pc += op1 != 0 ? op2 - 1 : 0;                                                \
+  DISPATCH()
+
   DISPATCH();
   for (;;) {
-  instr_nop:
-    break;
-  instr_cpy_i_a:
-    cpy(&r->a, instr[pc].operand1);
-    DISPATCH();
-  instr_cpy_i_b:
-    cpy(&r->b, instr[pc].operand1);
-    DISPATCH();
-  instr_cpy_i_c:
-    cpy(&r->c, instr[pc].operand1);
-    DISPATCH();
-  instr_cpy_i_d:
-    cpy(&r->d, instr[pc].operand1);
-    DISPATCH();
-  instr_cpy_a_a:
-    cpy(&r->a, r->a);
-    DISPATCH();
-  instr_cpy_a_b:
-    cpy(&r->b, r->a);
-    DISPATCH();
-  instr_cpy_a_c:
-    cpy(&r->c, r->a);
-    DISPATCH();
-  instr_cpy_a_d:
-    cpy(&r->d, r->a);
-    DISPATCH();
-  instr_cpy_b_a:
-    cpy(&r->a, r->b);
-    DISPATCH();
-  instr_cpy_b_b:
-    cpy(&r->b, r->b);
-    DISPATCH();
-  instr_cpy_b_c:
-    cpy(&r->c, r->b);
-    DISPATCH();
-  instr_cpy_b_d:
-    cpy(&r->d, r->b);
-    DISPATCH();
-  instr_cpy_c_a:
-    cpy(&r->a, r->c);
-    DISPATCH();
-  instr_cpy_c_b:
-    cpy(&r->b, r->c);
-    DISPATCH();
-  instr_cpy_c_c:
-    cpy(&r->c, r->c);
-    DISPATCH();
-  instr_cpy_c_d:
-    cpy(&r->d, r->c);
-    DISPATCH();
-  instr_cpy_d_a:
-    cpy(&r->a, r->d);
-    DISPATCH();
-  instr_cpy_d_b:
-    cpy(&r->b, r->d);
-    DISPATCH();
-  instr_cpy_d_c:
-    cpy(&r->c, r->d);
-    DISPATCH();
-  instr_cpy_d_d:
-    cpy(&r->d, r->d);
-    DISPATCH();
-  instr_inc_a:
-    inc(&r->a);
-    DISPATCH();
-  instr_inc_b:
-    inc(&r->b);
-    DISPATCH();
-  instr_inc_c:
-    inc(&r->c);
-    DISPATCH();
-  instr_inc_d:
-    inc(&r->d);
-    DISPATCH();
-  instr_dec_a:
-    dec(&r->a);
-    DISPATCH();
-  instr_dec_b:
-    dec(&r->b);
-    DISPATCH();
-  instr_dec_c:
-    dec(&r->c);
-    DISPATCH();
-  instr_dec_d:
-    dec(&r->d);
-    DISPATCH();
-  instr_jnz_i_i:
-    pc += jnz(instr[pc].operand1, instr[pc].operand2) - 1;
-    DISPATCH();
-  instr_jnz_a_i:
-    pc += jnz(r->a, instr[pc].operand2) - 1;
-    DISPATCH();
-  instr_jnz_b_i:
-    pc += jnz(r->b, instr[pc].operand2) - 1;
-    DISPATCH();
-  instr_jnz_c_i:
-    pc += jnz(r->c, instr[pc].operand2) - 1;
-    DISPATCH();
-  instr_jnz_d_i:
-    pc += jnz(r->d, instr[pc].operand2) - 1;
-    DISPATCH();
+    INSTR_LABEL(nop) : break;
+    INSTR_LABEL(cpy_i_a) : CPY(r->a, instr[pc].operand1);
+    INSTR_LABEL(cpy_i_b) : CPY(r->b, instr[pc].operand1);
+    INSTR_LABEL(cpy_i_c) : CPY(r->c, instr[pc].operand1);
+    INSTR_LABEL(cpy_i_d) : CPY(r->d, instr[pc].operand1);
+    INSTR_LABEL(cpy_a_a) : CPY(r->a, r->a);
+    INSTR_LABEL(cpy_a_b) : CPY(r->b, r->a);
+    INSTR_LABEL(cpy_a_c) : CPY(r->c, r->a);
+    INSTR_LABEL(cpy_a_d) : CPY(r->d, r->a);
+    INSTR_LABEL(cpy_b_a) : CPY(r->a, r->b);
+    INSTR_LABEL(cpy_b_b) : CPY(r->b, r->b);
+    INSTR_LABEL(cpy_b_c) : CPY(r->c, r->b);
+    INSTR_LABEL(cpy_b_d) : CPY(r->d, r->b);
+    INSTR_LABEL(cpy_c_a) : CPY(r->a, r->c);
+    INSTR_LABEL(cpy_c_b) : CPY(r->b, r->c);
+    INSTR_LABEL(cpy_c_c) : CPY(r->c, r->c);
+    INSTR_LABEL(cpy_c_d) : CPY(r->d, r->c);
+    INSTR_LABEL(cpy_d_a) : CPY(r->a, r->d);
+    INSTR_LABEL(cpy_d_b) : CPY(r->b, r->d);
+    INSTR_LABEL(cpy_d_c) : CPY(r->c, r->d);
+    INSTR_LABEL(cpy_d_d) : CPY(r->d, r->d);
+    INSTR_LABEL(inc_a) : INC(r->a);
+    INSTR_LABEL(inc_b) : INC(r->b);
+    INSTR_LABEL(inc_c) : INC(r->c);
+    INSTR_LABEL(inc_d) : INC(r->d);
+    INSTR_LABEL(dec_a) : DEC(r->a);
+    INSTR_LABEL(dec_b) : DEC(r->b);
+    INSTR_LABEL(dec_c) : DEC(r->c);
+    INSTR_LABEL(dec_d) : DEC(r->d);
+    INSTR_LABEL(jnz_i_i) : JNZ(instr[pc].operand1, instr[pc].operand2);
+    INSTR_LABEL(jnz_a_i) : JNZ(r->a, instr[pc].operand2);
+    INSTR_LABEL(jnz_b_i) : JNZ(r->b, instr[pc].operand2);
+    INSTR_LABEL(jnz_c_i) : JNZ(r->c, instr[pc].operand2);
+    INSTR_LABEL(jnz_d_i) : JNZ(r->d, instr[pc].operand2);
   }
 
 #undef DISPATCH
+#undef CPY
+#undef INC
+#undef DEC
+#undef JNZ
 }
 
 int main(void) {
