@@ -10,50 +10,21 @@ typedef struct {
   int32_t d;
 } registers;
 
+#define INSTR_LIST(code)                                                       \
+  code(nop), code(cpy_i_a), code(cpy_i_b), code(cpy_i_c), code(cpy_i_d),       \
+      code(cpy_a_a), code(cpy_a_b), code(cpy_a_c), code(cpy_a_d),              \
+      code(cpy_b_a), code(cpy_b_b), code(cpy_b_c), code(cpy_b_d),              \
+      code(cpy_c_a), code(cpy_c_b), code(cpy_c_c), code(cpy_c_d),              \
+      code(cpy_d_a), code(cpy_d_b), code(cpy_d_c), code(cpy_d_d), code(inc_a), \
+      code(inc_b), code(inc_c), code(inc_d), code(dec_a), code(dec_b),         \
+      code(dec_c), code(dec_d), code(jnz_i_i), code(jnz_a_i), code(jnz_b_i),   \
+      code(jnz_c_i), code(jnz_d_i)
+
+#define INSTR_TYPE(v) instr_type_##v
+#define INSTR_LABEL(v) instr_##v
+
 typedef enum {
-  INSTR_TYPE_NOP,
-
-  INSTR_TYPE_CPY_I_A,
-  INSTR_TYPE_CPY_I_B,
-  INSTR_TYPE_CPY_I_C,
-  INSTR_TYPE_CPY_I_D,
-
-  INSTR_TYPE_CPY_A_A,
-  INSTR_TYPE_CPY_A_B,
-  INSTR_TYPE_CPY_A_C,
-  INSTR_TYPE_CPY_A_D,
-
-  INSTR_TYPE_CPY_B_A,
-  INSTR_TYPE_CPY_B_B,
-  INSTR_TYPE_CPY_B_C,
-  INSTR_TYPE_CPY_B_D,
-
-  INSTR_TYPE_CPY_C_A,
-  INSTR_TYPE_CPY_C_B,
-  INSTR_TYPE_CPY_C_C,
-  INSTR_TYPE_CPY_C_D,
-
-  INSTR_TYPE_CPY_D_A,
-  INSTR_TYPE_CPY_D_B,
-  INSTR_TYPE_CPY_D_C,
-  INSTR_TYPE_CPY_D_D,
-
-  INSTR_TYPE_INC_A,
-  INSTR_TYPE_INC_B,
-  INSTR_TYPE_INC_C,
-  INSTR_TYPE_INC_D,
-
-  INSTR_TYPE_DEC_A,
-  INSTR_TYPE_DEC_B,
-  INSTR_TYPE_DEC_C,
-  INSTR_TYPE_DEC_D,
-
-  INSTR_TYPE_JNZ_I_I,
-
-  INSTR_TYPE_JNZ_A_I,
-  INSTR_TYPE_JNZ_B_I,
-  INSTR_TYPE_JNZ_C_I,
-  INSTR_TYPE_JNZ_D_I,
+  INSTR_LIST(INSTR_TYPE),
 } instruction_type;
 
 typedef struct {
@@ -80,29 +51,29 @@ static void parse_line(char *line, size_t length, void *userData) {
     if (custom_isdigit(*line)) {
       instr.operand1 = strtol(line, &line, 10);
       line++; // whitespace
-      instr.type = INSTR_TYPE_CPY_I_A + ((*line) - 'a');
+      instr.type = INSTR_TYPE(cpy_i_a) + ((*line) - 'a');
     } else {
-      instr.type = INSTR_TYPE_CPY_A_A + 4 * ((*line) - 'a');
+      instr.type = INSTR_TYPE(cpy_a_a) + 4 * ((*line) - 'a');
       line += 2;
       instr.type += ((*line) - 'a');
     }
     break;
   case 'j': // jnz
     if (custom_isdigit(*line)) {
-      instr.type = INSTR_TYPE_JNZ_I_I;
+      instr.type = INSTR_TYPE(jnz_i_i);
       instr.operand1 = strtol(line, &line, 10);
     } else {
-      instr.type = INSTR_TYPE_JNZ_A_I + ((*line) - 'a');
+      instr.type = INSTR_TYPE(jnz_a_i) + ((*line) - 'a');
     }
     line++;
     instr.operand2 = strtol(line, &line, 10);
     break;
   case 'i': // inc
-    instr.type = INSTR_TYPE_INC_A + ((*line) - 'a');
+    instr.type = INSTR_TYPE(inc_a) + ((*line) - 'a');
     instr.operand1 = strtol(line, &line, 10);
     break;
   case 'd': // dec
-    instr.type = INSTR_TYPE_DEC_A + ((*line) - 'a');
+    instr.type = INSTR_TYPE(dec_a) + ((*line) - 'a');
     instr.operand1 = strtol(line, &line, 10);
     break;
   }
@@ -132,15 +103,7 @@ static void run(const AuxArrayInstr *const instructions, registers *const r) {
   register int32_t pc = -1;
 
   static void *dispatchTable[] = {
-      &&instr_nop,     &&instr_cpy_i_a, &&instr_cpy_i_b, &&instr_cpy_i_c,
-      &&instr_cpy_i_d, &&instr_cpy_a_a, &&instr_cpy_a_b, &&instr_cpy_a_c,
-      &&instr_cpy_a_d, &&instr_cpy_b_a, &&instr_cpy_b_b, &&instr_cpy_b_c,
-      &&instr_cpy_b_d, &&instr_cpy_c_a, &&instr_cpy_c_b, &&instr_cpy_c_c,
-      &&instr_cpy_c_d, &&instr_cpy_d_a, &&instr_cpy_d_b, &&instr_cpy_d_c,
-      &&instr_cpy_d_d, &&instr_inc_a,   &&instr_inc_b,   &&instr_inc_c,
-      &&instr_inc_d,   &&instr_dec_a,   &&instr_dec_b,   &&instr_dec_c,
-      &&instr_dec_d,   &&instr_jnz_i_i, &&instr_jnz_a_i, &&instr_jnz_b_i,
-      &&instr_jnz_c_i, &&instr_jnz_d_i,
+      INSTR_LIST(&&INSTR_LABEL),
   };
 
 #define DISPATCH() goto *dispatchTable[instr[++pc].type]
@@ -257,7 +220,7 @@ int main(void) {
   AuxArrayInstr instructions;
   AuxArrayInstrCreate(&instructions, 32);
   AuxReadFileLineByLine("day12/input.txt", parse_line, &instructions);
-  AuxArrayInstrPush(&instructions, (instruction){.type = INSTR_TYPE_NOP});
+  AuxArrayInstrPush(&instructions, (instruction){.type = instr_type_nop});
 
   registers r = {0};
   run(&instructions, &r);
