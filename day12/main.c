@@ -129,7 +129,7 @@ static inline void dec(int32_t *const r) {
 
 static void run(const AuxArrayInstr *const instructions, registers *const r) {
   const instruction *const instr = instructions->items;
-  int32_t pc = -1;
+  register int32_t pc = -1;
 
   static void *dispatchTable[] = {
       &&instr_nop,     &&instr_cpy_i_a, &&instr_cpy_i_b, &&instr_cpy_i_c,
