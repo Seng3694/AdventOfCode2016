@@ -1,6 +1,7 @@
 #include <aux.h>
 #include <string.h>
 #include <ctype.h>
+#include <stdio.h>
 
 #define MATERIAL_TYPES 8 // only 5 in inputs
 #define FLOOR_COUNT 4
