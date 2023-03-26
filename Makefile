@@ -10,6 +10,8 @@ ifndef verbose
 	SILENT=@
 endif
 
+all: $(BIN) aux day01 day02 day03 day04 day05 day06 day07 day08 day09 day10 day11 day12 day13
+
 aux: $(BIN) $(AUX_OBJS)
 	$(SILENT) ar rcs $(BIN)/libaux.a $(AUX_OBJS)
 
@@ -61,4 +63,4 @@ $(BIN):
 clean:
 	$(SILENT) rm -rf ./$(BIN)/*
 
-.PHONY: aux day01 day02 day03 day04 day05 day06 day07 day08 day09 day10 day11 clean
+.PHONY: all aux day01 day02 day03 day04 day05 day06 day07 day08 day09 day10 day11 day12 day13 clean
