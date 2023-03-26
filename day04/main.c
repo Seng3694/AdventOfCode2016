@@ -15,8 +15,8 @@ typedef struct {
   char checksum[5];
 } room_data;
 
-#define ARRAY_T room_data
-#define ARRAY_T_NAME Room
+#define AUX_T room_data
+#define AUX_T_NAME Room
 #include <aux_array.h>
 
 static const char_info DEFAULT_CHAR_INFOS[26] = {

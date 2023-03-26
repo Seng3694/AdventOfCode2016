@@ -7,8 +7,8 @@ typedef struct {
   char data[CODE_LENGTH];
 } code;
 
-#define ARRAY_T code
-#define ARRAY_T_NAME Code
+#define AUX_T code
+#define AUX_T_NAME Code
 #include <aux_array.h>
 
 typedef struct {

@@ -72,8 +72,8 @@ static inline bool facility_equals(const facility *const a,
 #define AUX_T_EQUALS(a, b) facility_equals(a, b)
 #include <aux_hashset.h>
 
-#define ARRAY_T facility
-#define ARRAY_T_NAME Fac
+#define AUX_T facility
+#define AUX_T_NAME Fac
 #include <aux_array.h>
 
 static uint8_t add_material(const char *const material, const size_t length,

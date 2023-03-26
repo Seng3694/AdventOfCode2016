@@ -33,8 +33,8 @@ typedef struct {
   int8_t operand2;
 } instruction;
 
-#define ARRAY_T instruction
-#define ARRAY_T_NAME Instr
+#define AUX_T instruction
+#define AUX_T_NAME Instr
 #include <aux_array.h>
 
 static inline bool custom_isdigit(const char c) {

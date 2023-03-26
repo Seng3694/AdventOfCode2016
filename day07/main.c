@@ -19,12 +19,12 @@ typedef struct {
   char b;
 } aba_data;
 
-#define ARRAY_T ipv7_address
-#define ARRAY_T_NAME Ipv7
+#define AUX_T ipv7_address
+#define AUX_T_NAME Ipv7
 #include <aux_array.h>
 
-#define ARRAY_T aba_data
-#define ARRAY_T_NAME AbaData
+#define AUX_T aba_data
+#define AUX_T_NAME AbaData
 #include <aux_array.h>
 
 static void parse(char *line, size_t length, void *userData) {

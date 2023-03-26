@@ -26,12 +26,12 @@ static const int8_t keypad2_move_table[MOVE_DIRECTION_COUNT][0xD] = {
     {0, 0, -1, -1, 0, -1, -1, -1, -1, 0, -1, -1, 0}, // LEFT
 };
 
-#define ARRAY_T char
-#define ARRAY_T_NAME Char
+#define AUX_T char
+#define AUX_T_NAME Char
 #include <aux_array.h>
 
-#define ARRAY_T AuxArrayChar
-#define ARRAY_T_NAME String
+#define AUX_T AuxArrayChar
+#define AUX_T_NAME String
 #include <aux_array.h>
 
 void parse_line(char *line, size_t length, void *userData) {

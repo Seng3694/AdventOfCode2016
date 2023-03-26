@@ -7,8 +7,8 @@ typedef struct {
   uint32_t c;
 } triangle;
 
-#define ARRAY_T triangle
-#define ARRAY_T_NAME Triangle
+#define AUX_T triangle
+#define AUX_T_NAME Triangle
 #include <aux_array.h>
 
 static void parse_line(char *line, size_t length, void *userData) {

@@ -22,8 +22,8 @@ static inline bool position_equals(const position *const a,
 #define AUX_T_EQUALS(a, b) position_equals(a, b)
 #include <aux_hashset.h>
 
-#define ARRAY_T position
-#define ARRAY_T_NAME Pos
+#define AUX_T position
+#define AUX_T_NAME Pos
 #include <aux_array.h>
 
 static inline uint32_t function(const uint32_t x, const uint32_t y) {
