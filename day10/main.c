@@ -1,6 +1,7 @@
 #include <aux.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 typedef enum {
   INSTR_TYPE_LOW_HIGH_TO_BOT,

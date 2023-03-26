@@ -1,6 +1,7 @@
 #include <aux.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 typedef enum {
   INSTR_RECT,

@@ -1,5 +1,6 @@
 #include <aux.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 static inline char *parse_marker(char *input, int32_t *markerLength,
                                  int32_t *repetition) {

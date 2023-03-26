@@ -1,5 +1,6 @@
 #include <aux.h>
 #include <string.h>
+#include <stdio.h>
 
 #define CODE_LENGTH 8u
 
