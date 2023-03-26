@@ -45,17 +45,6 @@ static inline bool is_open(const uint32_t x, const uint32_t y,
   return is_even(popcnt32(function(x, y) + input));
 }
 
-static void print_map_part(const uint32_t fromX, const uint32_t fromY,
-                           const uint32_t toX, const uint32_t toY,
-                           const uint32_t input) {
-  for (uint32_t y = fromY; y < toY; ++y) {
-    for (uint32_t x = fromX; x < toX; ++x) {
-      printf("%c", is_open(x, y, input) ? '.' : '#');
-    }
-    printf("\n");
-  }
-}
-
 static void get_next_moves(const position *const pos, const uint32_t input,
                            AuxArrayPos *const nextMoves) {
   AuxArrayPosClear(nextMoves);
@@ -69,7 +58,8 @@ static void get_next_moves(const position *const pos, const uint32_t input,
     AuxArrayPosPush(nextMoves, (position){pos->x, pos->y + 1}); // down
 }
 
-static uint32_t solve_part1(const uint32_t input, const position destination) {
+static void solve_both_parts(const uint32_t input, const position destination,
+                             uint32_t *const part1, uint32_t *const part2) {
   AuxHashsetPos visited = {0};
   AuxHashsetPosCreate(&visited, 64);
   AuxArrayPos moves = {0};
@@ -85,6 +75,8 @@ static uint32_t solve_part1(const uint32_t input, const position destination) {
   uint32_t distance = 0;
 
   while (moves.length > 0) {
+    if (distance == 50)
+      *part2 = visited.count;
     const size_t length = moves.length;
     for (size_t i = 0; i < length; ++i) {
       const position *const current = &moves.items[i];
@@ -116,13 +108,16 @@ finish:
   AuxArrayPosDestroy(&moves);
   AuxHashsetPosDestroy(&visited);
 
-  return distance;
+  *part1 = distance;
 }
 
 int main(void) {
   const uint32_t input = 1364;
 
-  const uint32_t part1 = solve_part1(input, (position){31, 39});
+  uint32_t part1 = 0;
+  uint32_t part2 = 0;
+  solve_both_parts(input, (position){31, 39}, &part1, &part2);
 
   printf("%u\n", part1);
+  printf("%u\n", part2);
 }
