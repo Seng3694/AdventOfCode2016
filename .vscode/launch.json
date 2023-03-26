@@ -5,14 +5,13 @@
             "name": "aoc",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/day01",
+            "program": "${workspaceRoot}/bin/day13",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
             "MIMode": "gdb",
             "miDebuggerPath": "/usr/bin/gdb",
-            "preLaunchTask": "Build",
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",
