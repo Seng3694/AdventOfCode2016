@@ -29,20 +29,13 @@ static inline uint32_t function(const uint32_t x, const uint32_t y) {
   return x * x + 3 * x + 2 * x * y + y + y * y;
 }
 
-static uint32_t popcnt32(uint32_t i) {
-  i = i - ((i >> 1) & 0x55555555);                // add pairs of bits
-  i = (i & 0x33333333) + ((i >> 2) & 0x33333333); // quads
-  i = (i + (i >> 4)) & 0x0f0f0f0f;                // groups of 8
-  return (i * 0x01010101) >> 24;                  // horizontal sum of bytes
-}
-
 static inline bool is_even(const uint32_t value) {
   return ((~value) & 1);
 }
 
 static inline bool is_open(const uint32_t x, const uint32_t y,
                            const uint32_t input) {
-  return is_even(popcnt32(function(x, y) + input));
+  return is_even(AuxPopCnt32(function(x, y) + input));
 }
 
 static void get_next_moves(const position *const pos, const uint32_t input,
