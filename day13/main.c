@@ -10,7 +10,8 @@ static inline uint32_t calc_position_hash(const position *const pos) {
   return 2166136261u ^ (pos->x * 16777619) ^ (pos->y * 57620617);
 }
 
-static bool position_equals(const position *const a, const position *const b) {
+static inline bool position_equals(const position *const a,
+                                   const position *const b) {
   return a->x == b->x && a->y == b->y;
 }
 
