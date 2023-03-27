@@ -2,8 +2,6 @@
 #include <aux_md5.h>
 #include <string.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <assert.h>
 
 static const char hex_lookup[] = "0123456789abcdef";
 
