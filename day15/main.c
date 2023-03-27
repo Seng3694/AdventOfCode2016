@@ -34,8 +34,8 @@ static bool simulate(const AuxArrayDisc *const discs, uint32_t timer) {
   return true;
 }
 
-static uint32_t solve(const AuxArrayDisc *const discs) {
-  for (uint32_t i = 0;; ++i) {
+static uint32_t solve(const AuxArrayDisc *const discs, const uint32_t start) {
+  for (uint32_t i = start;; ++i) {
     if (simulate(discs, i))
       return i;
   }
@@ -44,12 +44,16 @@ static uint32_t solve(const AuxArrayDisc *const discs) {
 
 int main(void) {
   AuxArrayDisc discs = {0};
-  AuxArrayDiscCreate(&discs, 6);
+  AuxArrayDiscCreate(&discs, 7);
   AuxReadFileLineByLine("day15/input.txt", parse_line, &discs);
 
-  const uint32_t part1 = solve(&discs);
+  const uint32_t part1 = solve(&discs, 0);
+
+  AuxArrayDiscPush(&discs, (disc){.count = 11, .position = 0});
+  const uint32_t part2 = solve(&discs, part1);
 
   printf("%u\n", part1);
+  printf("%u\n", part2);
 
   AuxArrayDiscDestroy(&discs);
 }
