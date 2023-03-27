@@ -7,9 +7,8 @@ static const char hex_lookup[] = "0123456789abcdef";
 
 static inline char get_hash_char(const uint8_t *const hash,
                                  const uint8_t digit) {
-  const uint8_t subIndex = 1 - (digit % 2);
-  return hex_lookup[(hash[digit / 2] & (0x0f << (4 * subIndex))) >>
-                    (4 * subIndex)];
+  const uint8_t subIndex = 4 * (1 - (digit & 1));
+  return hex_lookup[(hash[digit >> 1] & (0x0f << subIndex)) >> subIndex];
 }
 
 static inline void hash_to_string(const uint8_t *const hash,
