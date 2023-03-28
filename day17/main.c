@@ -4,11 +4,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define DIR_UP 'U'
-#define DIR_DOWN 'D'
-#define DIR_LEFT 'L'
-#define DIR_RIGHT 'R'
-
 typedef struct {
   uint8_t x;
   uint8_t y;
