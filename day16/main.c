@@ -47,7 +47,7 @@ static size_t checksum(char *const disk, const size_t length) {
   return newLength;
 }
 
-static void solve_part1(const char *const input, const size_t diskLength) {
+static void solve(const char *const input, const size_t diskLength) {
   char *disk = calloc(1, diskLength + 1);
   fill_disk(input, strlen(input), disk, diskLength);
   size_t length = diskLength;
@@ -60,5 +60,6 @@ static void solve_part1(const char *const input, const size_t diskLength) {
 
 int main(void) {
   const char input[] = "10111011111001111";
-  solve_part1(input, 272);
+  solve(input, 272);
+  solve(input, 35651584);
 }
