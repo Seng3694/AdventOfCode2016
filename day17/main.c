@@ -4,10 +4,25 @@
 #include <stdlib.h>
 #include <string.h>
 
+typedef enum {
+  DIRECTION_UP,
+  DIRECTION_DOWN,
+  DIRECTION_LEFT,
+  DIRECTION_RIGHT,
+} direction;
+
 typedef struct {
   uint8_t x;
   uint8_t y;
 } position;
+
+static const char directionChars[] = {'U', 'D', 'L', 'R'};
+static const position directionMoves[] = {
+    {0, -1}, // UP
+    {0, 1},  // DOWN
+    {-1, 0}, // LEFT
+    {1, 0},  // RIGHT
+};
 
 #define AUX_T char
 #define AUX_T_NAME Dir
@@ -57,6 +72,23 @@ static inline bool can_move_right(const uint8_t *const hash,
   return pos.x < 3 && get_hash_char(hash, 3) > 'a';
 }
 
+static inline void move(position *const pos, const position dist) {
+  pos->x += dist.x;
+  pos->y += dist.y;
+}
+
+static void append_move(AuxArrayState *states, const state *const current,
+                        const direction dir) {
+  state clone = clone_state(current);
+  AuxArrayDirPush(&clone.path, directionChars[dir]);
+  move(&clone.pos, directionMoves[dir]);
+  AuxArrayStatePush(states, clone);
+}
+
+static inline bool has_reached_vault(const uint8_t x, const uint8_t y) {
+  return x == 3 && y == 3;
+}
+
 static void solve(const char *const input, const size_t inputLength,
                   const bool part1) {
   AuxArrayState states = {0};
@@ -78,66 +110,55 @@ static void solve(const char *const input, const size_t inputLength,
   while (states.length > 0) {
     const size_t statesLength = states.length;
     for (size_t i = 0; i < statesLength; ++i) {
-      const state *s = &states.items[i];
+      // for convenience. Can't store it in a variable because "items" might be
+      // reallocated
+#define CURRENT states.items[i]
 
-      if (s->path.length + inputLength > hashBufferCapacity) {
+      if (CURRENT.path.length + inputLength > hashBufferCapacity) {
         hashBufferCapacity *= 2;
         hashBuffer = realloc(hashBuffer, hashBufferCapacity);
       }
 
-      memcpy(hashBuffer + inputLength, s->path.items,
-             sizeof(char) * s->path.length);
-      AuxMD5(hashBuffer, inputLength + s->path.length, hash);
+      memcpy(hashBuffer + inputLength, CURRENT.path.items,
+             sizeof(char) * CURRENT.path.length);
+      AuxMD5(hashBuffer, inputLength + CURRENT.path.length, hash);
 
-      if (can_move_down(hash, s->pos)) {
-        if (s->pos.x == 3 && s->pos.y + 1 == 3) {
+      // moves will only be appended when they don't reach the vault.
+      if (can_move_down(hash, CURRENT.pos)) {
+        if (has_reached_vault(CURRENT.pos.x, CURRENT.pos.y + 1)) {
           if (part1) {
-            printf("%.*s\n", (int)s->path.length, s->path.items);
+            printf("%.*s\n", (int)CURRENT.path.length, CURRENT.path.items);
             goto finish;
           }
-          if (longestPath < s->path.length) {
-            longestPath = s->path.length + 1;
+          if (longestPath < CURRENT.path.length) {
+            longestPath = CURRENT.path.length + 1;
           }
         } else {
-          state clone = clone_state(s);
-          AuxArrayDirPush(&clone.path, 'D');
-          clone.pos.y++;
-          AuxArrayStatePush(&states, clone);
-          s = &states.items[i];
+          append_move(&states, &CURRENT, DIRECTION_DOWN);
         }
       }
-      if (can_move_right(hash, s->pos)) {
-        if (s->pos.x + 1 == 3 && s->pos.y == 3) {
+      if (can_move_right(hash, CURRENT.pos)) {
+        if (has_reached_vault(CURRENT.pos.x + 1, CURRENT.pos.y)) {
           if (part1) {
-            printf("%.*s\n", (int)s->path.length, s->path.items);
+            printf("%.*s\n", (int)CURRENT.path.length, CURRENT.path.items);
             goto finish;
           }
-          if (longestPath < s->path.length) {
-            longestPath = s->path.length + 1;
+          if (longestPath < CURRENT.path.length) {
+            longestPath = CURRENT.path.length + 1;
           }
         } else {
-          state clone = clone_state(s);
-          AuxArrayDirPush(&clone.path, 'R');
-          clone.pos.x++;
-          AuxArrayStatePush(&states, clone);
-          s = &states.items[i];
+          append_move(&states, &CURRENT, DIRECTION_RIGHT);
         }
       }
-      if (can_move_up(hash, s->pos)) {
-        state clone = clone_state(s);
-        AuxArrayDirPush(&clone.path, 'U');
-        clone.pos.y--;
-        AuxArrayStatePush(&states, clone);
-        s = &states.items[i];
+      // UP and LEFT can't reach the destination so no check there
+      if (can_move_up(hash, CURRENT.pos)) {
+        append_move(&states, &CURRENT, DIRECTION_UP);
       }
-      if (can_move_left(hash, s->pos)) {
-        state clone = clone_state(s);
-        AuxArrayDirPush(&clone.path, 'L');
-        clone.pos.x--;
-        AuxArrayStatePush(&states, clone);
-        s = &states.items[i];
+      if (can_move_left(hash, CURRENT.pos)) {
+        append_move(&states, &CURRENT, DIRECTION_LEFT);
       }
     }
+#undef CURRENT
 
     for (size_t i = 0; i < statesLength; ++i) {
       // TODO: think of a smarter way of reusing them
@@ -156,9 +177,8 @@ static void solve(const char *const input, const size_t inputLength,
 
 finish:
   free(hashBuffer);
-  for (size_t i = 0; i < states.length; ++i) {
+  for (size_t i = 0; i < states.length; ++i)
     AuxArrayDirDestroy(&states.items[i].path);
-  }
   AuxArrayStateDestroy(&states);
 }
 
