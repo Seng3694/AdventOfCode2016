@@ -62,7 +62,8 @@ static inline bool can_move_right(const uint8_t *const hash,
   return pos.x < 3 && get_hash_char(hash, 3) > 'a';
 }
 
-static void solve_part1(const char *const input, const size_t inputLength) {
+static void solve(const char *const input, const size_t inputLength,
+                  const bool part1) {
   AuxArrayState states = {0};
   AuxArrayStateCreate(&states, 128);
 
@@ -77,16 +78,12 @@ static void solve_part1(const char *const input, const size_t inputLength) {
   memcpy(hashBuffer, input, sizeof(char) * inputLength);
 
   uint8_t hash[16] = {0};
+  size_t longestPath = 0;
 
   while (states.length > 0) {
     const size_t statesLength = states.length;
     for (size_t i = 0; i < statesLength; ++i) {
-      const state *const s = &states.items[i];
-
-      if (s->pos.x == 3 && s->pos.y == 3) {
-        printf("%.*s\n", (int)s->path.length, s->path.items);
-        goto finish;
-      }
+      const state *s = &states.items[i];
 
       if (s->path.length + inputLength > hashBufferCapacity) {
         hashBufferCapacity *= 2;
@@ -98,28 +95,52 @@ static void solve_part1(const char *const input, const size_t inputLength) {
       AuxMD5(hashBuffer, inputLength + s->path.length, hash);
 
       if (can_move_down(hash, s->pos)) {
-        state clone = clone_state(s);
-        AuxArrayDirPush(&clone.path, 'D');
-        clone.pos.y++;
-        AuxArrayStatePush(&states, clone);
+        if (s->pos.x == 3 && s->pos.y + 1 == 3) {
+          if (part1) {
+            printf("%.*s\n", (int)s->path.length, s->path.items);
+            goto finish;
+          }
+          if (longestPath < s->path.length) {
+            longestPath = s->path.length + 1;
+          }
+        } else {
+          state clone = clone_state(s);
+          AuxArrayDirPush(&clone.path, 'D');
+          clone.pos.y++;
+          AuxArrayStatePush(&states, clone);
+          s = &states.items[i];
+        }
       }
       if (can_move_right(hash, s->pos)) {
-        state clone = clone_state(s);
-        AuxArrayDirPush(&clone.path, 'R');
-        clone.pos.x++;
-        AuxArrayStatePush(&states, clone);
+        if (s->pos.x + 1 == 3 && s->pos.y == 3) {
+          if (part1) {
+            printf("%.*s\n", (int)s->path.length, s->path.items);
+            goto finish;
+          }
+          if (longestPath < s->path.length) {
+            longestPath = s->path.length + 1;
+          }
+        } else {
+          state clone = clone_state(s);
+          AuxArrayDirPush(&clone.path, 'R');
+          clone.pos.x++;
+          AuxArrayStatePush(&states, clone);
+          s = &states.items[i];
+        }
       }
       if (can_move_up(hash, s->pos)) {
         state clone = clone_state(s);
         AuxArrayDirPush(&clone.path, 'U');
         clone.pos.y--;
         AuxArrayStatePush(&states, clone);
+        s = &states.items[i];
       }
       if (can_move_left(hash, s->pos)) {
         state clone = clone_state(s);
         AuxArrayDirPush(&clone.path, 'L');
         clone.pos.x--;
         AuxArrayStatePush(&states, clone);
+        s = &states.items[i];
       }
     }
 
@@ -135,6 +156,9 @@ static void solve_part1(const char *const input, const size_t inputLength) {
     states.length = newLength;
   }
 
+  // part 2
+  printf("%zu\n", longestPath);
+
 finish:
   free(hashBuffer);
   for (size_t i = 0; i < states.length; ++i) {
@@ -146,5 +170,6 @@ finish:
 int main(void) {
   const char input[] = "ioramepc";
 
-  solve_part1(input, sizeof(input) - 1);
+  solve(input, sizeof(input) - 1, true);
+  solve(input, sizeof(input) - 1, false);
 }
