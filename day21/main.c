@@ -56,25 +56,25 @@ static inline void swap_position(char *input, const uint8_t posA,
 }
 
 static void rotate_left(char *input, char *const buffer, const size_t length,
-                        uint8_t amount) {
-  amount %= length;
-  if (amount == 0)
+                        uint8_t step) {
+  step %= length;
+  if (step == 0)
     return;
   memcpy(buffer, input, length);
-  const uint8_t rest = length - amount;
-  memcpy(input, buffer + amount, rest);
-  memcpy(input + rest, buffer, amount);
+  const uint8_t rest = length - step;
+  memcpy(input, buffer + step, rest);
+  memcpy(input + rest, buffer, step);
 }
 
 static void rotate_right(char *input, char *const buffer, const size_t length,
-                         uint8_t amount) {
-  amount %= length;
-  if (amount == 0)
+                         uint8_t step) {
+  step %= length;
+  if (step == 0)
     return;
   memcpy(buffer, input, length);
-  const uint8_t rest = length - amount;
-  memcpy(input, buffer + rest, amount);
-  memcpy(input + amount, buffer, rest);
+  const uint8_t rest = length - step;
+  memcpy(input, buffer + rest, step);
+  memcpy(input + step, buffer, rest);
 }
 
 static void rotate_based_on_pos(char *input, char *const buffer,
@@ -83,8 +83,46 @@ static void rotate_based_on_pos(char *input, char *const buffer,
   if (!cp)
     return;
   const uint8_t index = (uint8_t)(cp - input);
-  const uint8_t amount = 1 + index + (index >= 4 ? 1 : 0);
-  rotate_right(input, buffer, length, amount);
+  const uint8_t step = 1 + index + (index >= 4 ? 1 : 0);
+  rotate_right(input, buffer, length, step);
+}
+
+// example:
+//  str length = 8
+//  i = index
+//  s = step
+//  ni = newIndex
+//  c = clamped newIndex
+//
+// i | s | ni | c
+// --------------
+// 0 | 1 |  1 | 1
+// 1 | 2 |  3 | 3
+// 2 | 3 |  5 | 5
+// 3 | 4 |  7 | 7
+// 4 | 6 | 10 | 2
+// 5 | 7 | 12 | 4
+// 6 | 8 | 14 | 6
+// 7 | 9 | 16 | 0
+//
+// this function translates a "c" to the "s" to undo the rotates
+static void undo_rotate_based_on_pos(char *input, char *const buffer,
+                                     const size_t length, const char c) {
+  const char *const cp = strchr(input, c);
+  if (!cp)
+    return;
+  uint8_t index = (uint8_t)(cp - input);
+  uint8_t previousIndex = 0;
+  if (index % 2 == 0) {
+    if (index == 0)
+      index += length;
+    index += length;
+    previousIndex = (index - 1) / 2;
+  } else {
+    previousIndex = index / 2;
+  }
+  const uint8_t step = index - previousIndex;
+  rotate_left(input, buffer, length, step);
 }
 
 static inline void reverse_range(char *input, const uint8_t from,
@@ -229,17 +267,56 @@ void scramble(char *const input, const size_t length,
   free(buffer);
 }
 
-int main(void) {
-  char input[] = "abcdefgh";
-  const size_t length = sizeof(input) - 1;
+void unscramble(char *const input, const size_t length,
+                const AuxArrayInstr *const instructions) {
+  char *buffer = malloc(length + 1);
 
+  for (int64_t i = (int64_t)instructions->length - 1; i >= 0; --i) {
+    if (i < 0)
+      break;
+    const instruction *const instr = &instructions->items[i];
+    switch (instr->type) {
+    case INSTR_SWAP_POSITION:
+      swap_position(input, instr->swpPos.x, instr->swpPos.y);
+      break;
+    case INSTR_SWAP_CHAR:
+      swap_chars(input, instr->swpChar.a, instr->swpChar.b);
+      break;
+    case INSTR_ROTATE_LEFT:
+      rotate_right(input, buffer, length, instr->rot.x);
+      break;
+    case INSTR_ROTATE_RIGHT:
+      rotate_left(input, buffer, length, instr->rot.x);
+      break;
+    case INSTR_ROTATE_POSITION:
+      undo_rotate_based_on_pos(input, buffer, length, instr->rotPos.a);
+      break;
+    case INSTR_REVERSE_RANGE:
+      reverse_range(input, instr->rev.x, instr->rev.y);
+      break;
+    case INSTR_MOVE:
+      move_char(input, length, instr->move.y, instr->move.x);
+      break;
+    }
+  }
+  free(buffer);
+}
+
+int main(void) {
   AuxArrayInstr instructions = {0};
   AuxArrayInstrCreate(&instructions, 100);
   AuxReadFileLineByLine("day21/input.txt", parse_line, &instructions);
 
-  scramble(input, length, &instructions);
+  char input1[] = "abcdefgh";
+  const size_t length1 = sizeof(input1) - 1;
+  scramble(input1, length1, &instructions);
 
-  printf("%s\n", input);
+  char input2[] = "fbgdceah";
+  const size_t length2 = sizeof(input2) - 1;
+  unscramble(input2, length2, &instructions);
+
+  printf("%s\n", input1);
+  printf("%s\n", input2);
 
   AuxArrayInstrDestroy(&instructions);
 }
