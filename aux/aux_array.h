@@ -24,6 +24,8 @@ typedef struct {
 
 #define ARRAY_CREATE ARRAY_IMPL(Create)
 #define ARRAY_DESTROY ARRAY_IMPL(Destroy)
+#define ARRAY_COPY ARRAY_IMPL(Copy)
+#define ARRAY_DUPE ARRAY_IMPL(Duplicate)
 #define ARRAY_PUSH ARRAY_IMPL(Push)
 #define ARRAY_POP ARRAY_IMPL(Pop)
 #define ARRAY_FIRST ARRAY_IMPL(First)
@@ -35,6 +37,10 @@ typedef struct {
 ARRAY_LINKAGE void ARRAY_CREATE(ARRAY_NAME *const arr,
                                 const ARRAY_SIZE_T capacity);
 ARRAY_LINKAGE void ARRAY_DESTROY(ARRAY_NAME *const arr);
+ARRAY_LINKAGE void ARRAY_COPY(ARRAY_NAME *const dest,
+                              const ARRAY_NAME *const src);
+ARRAY_LINKAGE void ARRAY_DUPE(ARRAY_NAME *const dest,
+                              const ARRAY_NAME *const src);
 ARRAY_LINKAGE void ARRAY_PUSH(ARRAY_NAME *const arr, AUX_T item);
 ARRAY_LINKAGE void ARRAY_POP(ARRAY_NAME *const arr);
 ARRAY_LINKAGE AUX_T *ARRAY_FIRST(ARRAY_NAME *const arr);
@@ -55,6 +61,20 @@ ARRAY_LINKAGE void ARRAY_CREATE(ARRAY_NAME *const arr,
 ARRAY_LINKAGE void ARRAY_DESTROY(ARRAY_NAME *const arr) {
   free(arr->items);
   arr->items = NULL;
+}
+
+ARRAY_LINKAGE void ARRAY_COPY(ARRAY_NAME *const dest,
+                              const ARRAY_NAME *const src) {
+  ARRAY_ENSURE_CAPACITY(dest, src->capacity);
+  memcpy(dest->items, src->items, sizeof(AUX_T) * src->length);
+  dest->length = src->length;
+}
+
+ARRAY_LINKAGE void ARRAY_DUPE(ARRAY_NAME *const dest,
+                              const ARRAY_NAME *const src) {
+  ARRAY_CREATE(dest, src->capacity);
+  memcpy(dest->items, src->items, sizeof(AUX_T) * src->length);
+  dest->length = src->length;
 }
 
 ARRAY_LINKAGE void ARRAY_PUSH(ARRAY_NAME *const arr, AUX_T item) {
