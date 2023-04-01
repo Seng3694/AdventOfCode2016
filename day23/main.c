@@ -2,6 +2,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 typedef struct {
   int32_t a;
@@ -282,11 +283,21 @@ int main(void) {
   AuxReadFileLineByLine("day23/input.txt", parse_line, &instructions);
   AuxArrayInstrPush(&instructions, (instruction){.type = instr_type_nop});
 
+  AuxArrayInstr workingCopy;
+  AuxArrayInstrDuplicate(&workingCopy, &instructions);
+
   registers r = {.a = 7};
-  run(&instructions, &r);
+  run(&workingCopy, &r);
   const int32_t part1 = r.a;
 
-  printf("%d\n", part1);
+  AuxArrayInstrCopy(&workingCopy, &instructions);
+  r = (registers){.a = 12};
+  run(&workingCopy, &r);
+  const int32_t part2 = r.a;
 
+  printf("%d\n", part1);
+  printf("%d\n", part2);
+
+  AuxArrayInstrDestroy(&workingCopy);
   AuxArrayInstrDestroy(&instructions);
 }
