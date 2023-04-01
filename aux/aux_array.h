@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 
 #define COMBINE(a, b) a##b
 #define COMBINE2(a, b) COMBINE(a, b)
@@ -123,6 +124,8 @@ ARRAY_LINKAGE void ARRAY_CLEAR(ARRAY_NAME *const arr) {
 #undef ARRAY_SIZE_T
 #undef ARRAY_CREATE
 #undef ARRAY_DESTROY
+#undef ARRAY_COPY
+#undef ARRAY_DUPE
 #undef ARRAY_PUSH
 #undef ARRAY_POP
 #undef ARRAY_FIRST
