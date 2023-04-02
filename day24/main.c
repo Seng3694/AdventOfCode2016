@@ -187,6 +187,7 @@ typedef struct {
 
 typedef struct {
   uint32_t shortestPath;
+  uint32_t shortestPathFull;
   size_t count;
   node *nodes;
 } permutation_data;
@@ -204,6 +205,11 @@ static void evaluate_permutation(const size_t *const indices, void *userData) {
     if (distance < data->shortestPath) {
       data->shortestPath = distance;
     }
+
+    distance += *data->nodes[indices[data->count - 1]].pathLengths[indices[0]];
+    if (distance < data->shortestPathFull) {
+      data->shortestPathFull = distance;
+    }
   }
 }
 
@@ -212,10 +218,9 @@ static void generate_permutations(size_t *const indices, size_t n,
   if (n == 1) {
     evaluate_permutation(indices, userData);
   } else {
-    // skip first. always start at 0
-    for (size_t i = 1; i < n; ++i) {
+    for (size_t i = 0; i < n; ++i) {
       generate_permutations(indices, n - 1, userData);
-      const size_t swapIndex = (n % 2 == 0) ? i : 1;
+      const size_t swapIndex = (n % 2 == 0) ? i : 0;
       const uint32_t tmp = indices[swapIndex];
       indices[swapIndex] = indices[n - 1];
       indices[n - 1] = tmp;
@@ -223,7 +228,8 @@ static void generate_permutations(size_t *const indices, size_t n,
   }
 }
 
-static uint32_t solve_part1(const map *const m) {
+static void solve_both(const map *const m, uint32_t *const part1,
+                       uint32_t *const part2) {
   uint32_t count = m->poiCount * (m->poiCount - 1) / 2;
 
   AuxArrayUint32 pathLengths = {0};
@@ -244,13 +250,16 @@ static uint32_t solve_part1(const map *const m) {
       .count = m->poiCount,
       .nodes = nodes,
       .shortestPath = UINT32_MAX,
+      .shortestPathFull = UINT32_MAX,
   };
 
   size_t indices[10] = {0, 1, 2, 3, 4, 5, 6, 7};
   generate_permutations(indices, data.count, &data);
 
   AuxArrayUint32Destroy(&pathLengths);
-  return data.shortestPath;
+
+  *part1 = data.shortestPath;
+  *part2 = data.shortestPathFull;
 }
 
 int main(void) {
@@ -261,9 +270,12 @@ int main(void) {
   AuxReadFileLineByLine("day24/input.txt", parse_line, &ctx);
   m.height = ctx.lineCount;
 
-  const uint32_t part1 = solve_part1(&m);
+  uint32_t part1 = 0;
+  uint32_t part2 = 0;
+  solve_both(&m, &part1, &part2);
 
   printf("%u\n", part1);
+  printf("%u\n", part2);
 
   AuxArrayCharDestroy(&m.data);
 }
