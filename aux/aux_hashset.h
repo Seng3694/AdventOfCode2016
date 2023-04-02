@@ -34,6 +34,7 @@
 
 #define HS_NAME COMBINE2(AuxHashset, AUX_T_NAME)
 #define HS_IMPL(word) COMBINE2(HS_NAME, word)
+#define HS_IMPL_INTERNAL(word) COMBINE2(_, COMBINE2(HS_NAME, word))
 #define HS_LINKAGE static inline
 #define HS_SIZE_T size_t
 #define HS_MAX_LOAD 0.75
@@ -46,8 +47,8 @@ typedef struct {
 
 #define HS_CREATE HS_IMPL(Create)
 #define HS_DESTROY HS_IMPL(Destroy)
-#define HS_ADJUST_CAP HS_IMPL(AdjustCapacity)
-#define HS_INSERT_INTERNAL HS_IMPL(InsertInternal)
+#define HS_ADJUST_CAP HS_IMPL_INTERNAL(AdjustCapacity)
+#define HS_INSERT_INTERNAL HS_IMPL_INTERNAL(Insert)
 #define HS_INSERT HS_IMPL(Insert)
 #define HS_INSERT_PH HS_IMPL(InsertPreHashed)
 #define HS_REMOVE HS_IMPL(Remove)
@@ -194,6 +195,7 @@ HS_LINKAGE bool HS_CONTAINS(const HS_NAME *const hs, const AUX_T key,
 #undef AUX_T_EQUALS
 #undef HS_NAME
 #undef HS_IMPL
+#undef HS_IMPL_INTERNAL
 #undef HS_LINKAGE
 #undef HS_SIZE_T
 #undef HS_MAX_LOAD
