@@ -13,7 +13,7 @@ endif
 profiling: CFLAGS=-g -pg -O2 -Wall -std=c99
 profiling: day14
 
-all: $(BIN) aux day01 day02 day03 day04 day05 day06 day07 day08 day09 day10 day11 day12 day13 day14 day15 day16 day17 day18 day19 day20 day21 day22 day23
+all: $(BIN) aux day01 day02 day03 day04 day05 day06 day07 day08 day09 day10 day11 day12 day13 day14 day15 day16 day17 day18 day19 day20 day21 day22 day23 day24
 
 aux: $(BIN) $(AUX_OBJS)
 	$(SILENT) ar rcs $(BIN)/libaux.a $(AUX_OBJS)
@@ -87,6 +87,9 @@ day22: $(BIN) aux
 day23: $(BIN) aux
 	$(SILENT) $(CC) $(CFLAGS) -o $(BIN)/day23 day23/main.c -Iaux -L$(BIN) -laux -lm
 
+day24: $(BIN) aux
+	$(SILENT) $(CC) $(CFLAGS) -o $(BIN)/day24 day24/main.c -Iaux -L$(BIN) -laux -lm
+
 $(BIN)/%.o: aux/%.c
 	$(SILENT) $(CC) -c $(CFLAGS) $< -o $@
 
@@ -96,4 +99,4 @@ $(BIN):
 clean:
 	$(SILENT) rm -rf ./$(BIN)/*
 
-.PHONY: all aux day01 day02 day03 day04 day05 day06 day07 day08 day09 day10 day11 day12 day13 day14 day15 day16 day17 day18 day19 day20 day21 day22 day23 clean profiling
+.PHONY: all aux day01 day02 day03 day04 day05 day06 day07 day08 day09 day10 day11 day12 day13 day14 day15 day16 day17 day18 day19 day20 day21 day22 day23 day24 clean profiling
