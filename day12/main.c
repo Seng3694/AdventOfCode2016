@@ -1,4 +1,4 @@
-#include <aux.h>
+#include <aoc/aoc.h>
 #include <ctype.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -33,9 +33,9 @@ typedef struct {
   int8_t operand2;
 } instruction;
 
-#define AUX_T instruction
-#define AUX_T_NAME Instr
-#include <aux_array.h>
+#define AOC_T instruction
+#define AOC_T_NAME Instr
+#include <aoc/array.h>
 
 static inline bool custom_isdigit(const char c) {
   return c == '-' || isdigit(c);
@@ -78,11 +78,11 @@ static void parse_line(char *line, size_t length, void *userData) {
     break;
   }
 
-  AuxArrayInstr *instructions = userData;
-  AuxArrayInstrPush(instructions, instr);
+  AocArrayInstr *instructions = userData;
+  AocArrayInstrPush(instructions, instr);
 }
 
-static void run(const AuxArrayInstr *const instructions, registers *const r) {
+static void run(const AocArrayInstr *const instructions, registers *const r) {
   const instruction *const instr = instructions->items;
   register int32_t pc = -1;
 
@@ -154,10 +154,10 @@ static void run(const AuxArrayInstr *const instructions, registers *const r) {
 }
 
 int main(void) {
-  AuxArrayInstr instructions;
-  AuxArrayInstrCreate(&instructions, 32);
-  AuxReadFileLineByLine("day12/input.txt", parse_line, &instructions);
-  AuxArrayInstrPush(&instructions, (instruction){.type = instr_type_nop});
+  AocArrayInstr instructions;
+  AocArrayInstrCreate(&instructions, 32);
+  AocReadFileLineByLine("day12/input.txt", parse_line, &instructions);
+  AocArrayInstrPush(&instructions, (instruction){.type = instr_type_nop});
 
   registers r = {0};
   run(&instructions, &r);
@@ -170,5 +170,5 @@ int main(void) {
   printf("%d\n", part1);
   printf("%d\n", part2);
 
-  AuxArrayInstrDestroy(&instructions);
+  AocArrayInstrDestroy(&instructions);
 }

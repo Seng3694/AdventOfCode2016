@@ -1,0 +1,3 @@
+[submodule "aocaux"]
+	path = aocaux
+	url = https://github.com/Seng3694/aocaux.git

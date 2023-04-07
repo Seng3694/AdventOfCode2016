@@ -1,4 +1,4 @@
-#include <aux.h>
+#include <aoc/aoc.h>
 #include <ctype.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -40,9 +40,9 @@ typedef struct {
   int16_t operand2;
 } instruction;
 
-#define AUX_T instruction
-#define AUX_T_NAME Instr
-#include <aux_array.h>
+#define AOC_T instruction
+#define AOC_T_NAME Instr
+#include <aoc/array.h>
 
 static inline bool custom_isdigit(const char c) {
   return c == '-' || isdigit(c);
@@ -104,11 +104,11 @@ static void parse_line(char *line, size_t length, void *userData) {
     break;
   }
 
-  AuxArrayInstr *instructions = userData;
-  AuxArrayInstrPush(instructions, instr);
+  AocArrayInstr *instructions = userData;
+  AocArrayInstrPush(instructions, instr);
 }
 
-static bool run(AuxArrayInstr *const instructions, registers *const r) {
+static bool run(AocArrayInstr *const instructions, registers *const r) {
   instruction *const instr = instructions->items;
   register int32_t pc = -1;
 
@@ -229,13 +229,13 @@ static bool run(AuxArrayInstr *const instructions, registers *const r) {
 }
 
 int main(void) {
-  AuxArrayInstr instructions;
-  AuxArrayInstrCreate(&instructions, 32);
-  AuxReadFileLineByLine("day25/input.txt", parse_line, &instructions);
-  AuxArrayInstrPush(&instructions, (instruction){.type = instr_type_nop});
+  AocArrayInstr instructions;
+  AocArrayInstrCreate(&instructions, 32);
+  AocReadFileLineByLine("day25/input.txt", parse_line, &instructions);
+  AocArrayInstrPush(&instructions, (instruction){.type = instr_type_nop});
 
-  AuxArrayInstr workingCopy;
-  AuxArrayInstrDuplicate(&workingCopy, &instructions);
+  AocArrayInstr workingCopy;
+  AocArrayInstrDuplicate(&workingCopy, &instructions);
 
   for (int i = 0;; ++i) {
     registers r = {.a = i};
@@ -243,9 +243,9 @@ int main(void) {
       printf("%d", i);
       break;
     }
-    AuxArrayInstrCopy(&workingCopy, &instructions);
+    AocArrayInstrCopy(&workingCopy, &instructions);
   }
 
-  AuxArrayInstrDestroy(&workingCopy);
-  AuxArrayInstrDestroy(&instructions);
+  AocArrayInstrDestroy(&workingCopy);
+  AocArrayInstrDestroy(&instructions);
 }

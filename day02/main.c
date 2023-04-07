@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <string.h>
-#include <aux.h>
+#include <aoc/aoc.h>
 
 typedef enum {
   MOVE_DIRECTION_UP,
@@ -26,22 +26,22 @@ static const int8_t keypad2_move_table[MOVE_DIRECTION_COUNT][0xD] = {
     {0, 0, -1, -1, 0, -1, -1, -1, -1, 0, -1, -1, 0}, // LEFT
 };
 
-#define AUX_T char
-#define AUX_T_NAME Char
-#include <aux_array.h>
+#define AOC_T char
+#define AOC_T_NAME Char
+#include <aoc/array.h>
 
-#define AUX_T AuxArrayChar
-#define AUX_T_NAME String
-#include <aux_array.h>
+#define AOC_T AocArrayChar
+#define AOC_T_NAME String
+#include <aoc/array.h>
 
 void parse_line(char *line, size_t length, void *userData) {
-  AuxArrayString *arr = (AuxArrayString *)userData;
-  AuxArrayChar str;
-  AuxRemoveTrailingWhitespace(line, &length);
-  AuxArrayCharCreate(&str, length + 1);
+  AocArrayString *arr = (AocArrayString *)userData;
+  AocArrayChar str;
+  AocTrimRight(line, &length);
+  AocArrayCharCreate(&str, length + 1);
   memcpy(str.items, line, length + 1);
   str.length = length;
-  AuxArrayStringPush(arr, str);
+  AocArrayStringPush(arr, str);
 }
 
 static inline move_direction char_to_move_direction(const char c) {
@@ -57,39 +57,39 @@ static inline move_direction char_to_move_direction(const char c) {
   }
 }
 
-static AuxArrayChar solve(const AuxArrayString *const instructions,
+static AocArrayChar solve(const AocArrayString *const instructions,
                           const int8_t moveTable[MOVE_DIRECTION_COUNT][0xD]) {
-  AuxArrayChar code;
-  AuxArrayCharCreate(&code, 32);
+  AocArrayChar code;
+  AocArrayCharCreate(&code, 32);
   memset(code.items, 0, code.capacity);
   int8_t index = 4;
   for (size_t i = 0; i < instructions->length; ++i) {
-    const AuxArrayChar *const directions = &instructions->items[i];
+    const AocArrayChar *const directions = &instructions->items[i];
     for (size_t j = 0; j < directions->length; ++j) {
       const move_direction dir = char_to_move_direction(directions->items[j]);
       index += moveTable[dir][index];
     }
-    AuxArrayCharPush(&code, index_to_char_mapping[index]);
+    AocArrayCharPush(&code, index_to_char_mapping[index]);
   }
   return code;
 }
 
 int main(void) {
-  AuxArrayString instructions;
-  AuxArrayStringCreate(&instructions, 8);
-  AuxReadFileLineByLine("day02/input.txt", parse_line, &instructions);
+  AocArrayString instructions;
+  AocArrayStringCreate(&instructions, 8);
+  AocReadFileLineByLine("day02/input.txt", parse_line, &instructions);
 
-  AuxArrayChar part1 = solve(&instructions, keypad1_move_table);
-  AuxArrayChar part2 = solve(&instructions, keypad2_move_table);
+  AocArrayChar part1 = solve(&instructions, keypad1_move_table);
+  AocArrayChar part2 = solve(&instructions, keypad2_move_table);
 
   printf("%s\n", part1.items);
   printf("%s\n", part2.items);
 
-  AuxArrayCharDestroy(&part1);
-  AuxArrayCharDestroy(&part2);
+  AocArrayCharDestroy(&part1);
+  AocArrayCharDestroy(&part2);
 
   for (size_t i = 0; i < instructions.length; ++i) {
-    AuxArrayCharDestroy(&instructions.items[i]);
+    AocArrayCharDestroy(&instructions.items[i]);
   }
-  AuxArrayStringDestroy(&instructions);
+  AocArrayStringDestroy(&instructions);
 }

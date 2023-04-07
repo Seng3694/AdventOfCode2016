@@ -1,4 +1,4 @@
-#include <aux.h>
+#include <aoc/aoc.h>
 #include <string.h>
 #include <ctype.h>
 #include <stdio.h>
@@ -46,10 +46,10 @@ static uint32_t calc_facility_hash(const facility *const fac) {
   for (size_t i = 0; i < MATERIAL_TYPES; ++i) {
     uint32_t matHash = 58246577;
     for (size_t j = 0; j < FLOOR_COUNT; ++j) {
-      if (AUX_CHECK_BIT(fac->floors[j].chips, i)) {
+      if (AOC_CHECK_BIT(fac->floors[j].chips, i)) {
         matHash ^= j * 16777619;
       }
-      if (AUX_CHECK_BIT(fac->floors[j].generators, i)) {
+      if (AOC_CHECK_BIT(fac->floors[j].generators, i)) {
         matHash ^= j * 57620617;
       }
     }
@@ -65,16 +65,17 @@ static inline bool facility_equals(const facility *const a,
   return calc_facility_hash(a) == calc_facility_hash(b);
 }
 
-#define AUX_T facility
-#define AUX_T_NAME Fac
-#define AUX_T_EMPTY EMPTY_FAC
-#define AUX_T_HFUNC(x) calc_facility_hash(x)
-#define AUX_T_EQUALS(a, b) facility_equals(a, b)
-#include <aux_hashset.h>
+#define AOC_T facility
+#define AOC_T_NAME Fac
+#define AOC_T_EMPTY EMPTY_FAC
+#define AOC_T_HFUNC(x) calc_facility_hash(x)
+#define AOC_T_EQUALS(a, b) facility_equals(a, b)
+#define AOC_BASE2_CAPACITY
+#include <aoc/hashset.h>
 
-#define AUX_T facility
-#define AUX_T_NAME Fac
-#include <aux_array.h>
+#define AOC_T facility
+#define AOC_T_NAME Fac
+#include <aoc/array.h>
 
 static uint8_t add_material(const char *const material, const size_t length,
                             parsing_context *const ctx) {
@@ -108,10 +109,10 @@ static void parse_line(char *line, size_t length, void *userData) {
     const uint8_t matIndex = add_material(name, line - name, ctx);
     if (*line == ' ') /* generator */ {
       line += 10; // skip " generator"
-      f->generators = AUX_SET_BIT(f->generators, matIndex);
+      f->generators = AOC_SET_BIT(f->generators, matIndex);
     } else /* microchip */ {
       line += 21; // skip "-compatible microchip"
-      f->chips = AUX_SET_BIT(f->chips, matIndex);
+      f->chips = AOC_SET_BIT(f->chips, matIndex);
     }
     if (*line == '.') {
       break;
@@ -134,12 +135,12 @@ static void print_facility(const facility *const fac,
       break;
     printf("\e[1;94m%c\e[0m f%u: ", fac->elevator == i ? '>' : ' ', i + 1);
     for (uint8_t j = 0; j < md->materialCount; ++j) {
-      if (AUX_CHECK_BIT(fac->floors[i].generators, j))
+      if (AOC_CHECK_BIT(fac->floors[i].generators, j))
         printf("%s%.*sg \e[0m", G_COLORS[j], 2, md->materials[j]);
       else
         printf(" .  ");
 
-      if (AUX_CHECK_BIT(fac->floors[i].chips, j))
+      if (AOC_CHECK_BIT(fac->floors[i].chips, j))
         printf("%s%.*sm \e[0m", MC_COLORS[j], 2, md->materials[j]);
       else
         printf(" .  ");
@@ -155,19 +156,19 @@ static void print_facility(const facility *const fac,
 
 static bool is_valid_floor(const floor *const f, const uint8_t materialCount) {
   for (uint8_t i = 0; i < materialCount; ++i) {
-    if (AUX_CHECK_BIT(f->chips, i) && f->generators != 0 &&
-        !AUX_CHECK_BIT(f->generators, i)) {
+    if (AOC_CHECK_BIT(f->chips, i) && f->generators != 0 &&
+        !AOC_CHECK_BIT(f->generators, i)) {
       return false;
     }
   }
   return true;
 }
 
-static void get_valid_actions(const facility *const state, AuxArrayFac *actions,
-                              AuxHashsetFac *const actionsHashset,
+static void get_valid_actions(const facility *const state, AocArrayFac *actions,
+                              AocHashsetFac *const actionsHashset,
                               const uint8_t materialCount) {
-  AuxArrayFacClear(actions);
-  AuxHashsetFacClear(actionsHashset);
+  AocArrayFacClear(actions);
+  AocHashsetFacClear(actionsHashset);
   const floor *const f = &state->floors[state->elevator];
 
   // one generator and/or one chip
@@ -176,17 +177,17 @@ static void get_valid_actions(const facility *const state, AuxArrayFac *actions,
       if (c == -1 && g == -1)
         continue;
       facility newState = *state;
-      const bool hasChip = c != -1 && AUX_CHECK_BIT(f->chips, c);
-      const bool hasGenerator = g != -1 && AUX_CHECK_BIT(f->generators, g);
+      const bool hasChip = c != -1 && AOC_CHECK_BIT(f->chips, c);
+      const bool hasGenerator = g != -1 && AOC_CHECK_BIT(f->generators, g);
 
       if (hasChip) {
         newState.floors[state->elevator].chips =
-            AUX_CLEAR_BIT(newState.floors[state->elevator].chips, c);
+            AOC_CLEAR_BIT(newState.floors[state->elevator].chips, c);
       }
 
       if (hasGenerator) {
         newState.floors[state->elevator].generators =
-            AUX_CLEAR_BIT(newState.floors[state->elevator].generators, g);
+            AOC_CLEAR_BIT(newState.floors[state->elevator].generators, g);
       }
 
       if (!is_valid_floor(&newState.floors[state->elevator], materialCount))
@@ -200,10 +201,10 @@ static void get_valid_actions(const facility *const state, AuxArrayFac *actions,
         facility s = newState;
         s.elevator = i;
         if (hasChip) {
-          s.floors[i].chips = AUX_SET_BIT(s.floors[i].chips, c);
+          s.floors[i].chips = AOC_SET_BIT(s.floors[i].chips, c);
         }
         if (hasGenerator) {
-          s.floors[i].generators = AUX_SET_BIT(s.floors[i].generators, g);
+          s.floors[i].generators = AOC_SET_BIT(s.floors[i].generators, g);
         }
 
         // check if only the elevator changed. can't move elevator without
@@ -217,9 +218,9 @@ static void get_valid_actions(const facility *const state, AuxArrayFac *actions,
 
         uint32_t hash;
         if (is_valid_floor(&s.floors[i], materialCount) &&
-            !AuxHashsetFacContains(actionsHashset, s, &hash)) {
-          AuxArrayFacPush(actions, s);
-          AuxHashsetFacInsertPreHashed(actionsHashset, s, hash);
+            !AocHashsetFacContains(actionsHashset, s, &hash)) {
+          AocArrayFacPush(actions, s);
+          AocHashsetFacInsertPreHashed(actionsHashset, s, hash);
         }
       }
     }
@@ -228,16 +229,16 @@ static void get_valid_actions(const facility *const state, AuxArrayFac *actions,
   // 2 chips
   for (uint8_t c1 = 0; c1 < materialCount; ++c1) {
     for (uint8_t c2 = c1 + 1; c2 < materialCount; ++c2) {
-      if (!AUX_CHECK_BIT(f->chips, c1) || !AUX_CHECK_BIT(f->chips, c2))
+      if (!AOC_CHECK_BIT(f->chips, c1) || !AOC_CHECK_BIT(f->chips, c2))
         continue;
 
       facility newState = *state;
 
       newState.floors[state->elevator].chips =
-          AUX_CLEAR_BIT(newState.floors[state->elevator].chips, c1);
+          AOC_CLEAR_BIT(newState.floors[state->elevator].chips, c1);
 
       newState.floors[state->elevator].chips =
-          AUX_CLEAR_BIT(newState.floors[state->elevator].chips, c2);
+          AOC_CLEAR_BIT(newState.floors[state->elevator].chips, c2);
 
       if (!is_valid_floor(&newState.floors[state->elevator], materialCount))
         continue;
@@ -249,8 +250,8 @@ static void get_valid_actions(const facility *const state, AuxArrayFac *actions,
 
         facility s = newState;
         s.elevator = i;
-        s.floors[i].chips = AUX_SET_BIT(s.floors[i].chips, c1);
-        s.floors[i].chips = AUX_SET_BIT(s.floors[i].chips, c2);
+        s.floors[i].chips = AOC_SET_BIT(s.floors[i].chips, c1);
+        s.floors[i].chips = AOC_SET_BIT(s.floors[i].chips, c2);
 
         // check if only the elevator changed. can't move elevator without
         // moving an item
@@ -263,9 +264,9 @@ static void get_valid_actions(const facility *const state, AuxArrayFac *actions,
 
         uint32_t hash;
         if (is_valid_floor(&s.floors[i], materialCount) &&
-            !AuxHashsetFacContains(actionsHashset, s, &hash)) {
-          AuxArrayFacPush(actions, s);
-          AuxHashsetFacInsertPreHashed(actionsHashset, s, hash);
+            !AocHashsetFacContains(actionsHashset, s, &hash)) {
+          AocArrayFacPush(actions, s);
+          AocHashsetFacInsertPreHashed(actionsHashset, s, hash);
         }
       }
     }
@@ -274,17 +275,17 @@ static void get_valid_actions(const facility *const state, AuxArrayFac *actions,
   // 2 generators
   for (uint8_t g1 = 0; g1 < materialCount; ++g1) {
     for (uint8_t g2 = g1 + 1; g2 < materialCount; ++g2) {
-      if (!AUX_CHECK_BIT(f->generators, g1) ||
-          !AUX_CHECK_BIT(f->generators, g2))
+      if (!AOC_CHECK_BIT(f->generators, g1) ||
+          !AOC_CHECK_BIT(f->generators, g2))
         continue;
 
       facility newState = *state;
 
       newState.floors[state->elevator].generators =
-          AUX_CLEAR_BIT(newState.floors[state->elevator].generators, g1);
+          AOC_CLEAR_BIT(newState.floors[state->elevator].generators, g1);
 
       newState.floors[state->elevator].generators =
-          AUX_CLEAR_BIT(newState.floors[state->elevator].generators, g2);
+          AOC_CLEAR_BIT(newState.floors[state->elevator].generators, g2);
 
       if (!is_valid_floor(&newState.floors[state->elevator], materialCount))
         continue;
@@ -296,8 +297,8 @@ static void get_valid_actions(const facility *const state, AuxArrayFac *actions,
 
         facility s = newState;
         s.elevator = i;
-        s.floors[i].generators = AUX_SET_BIT(s.floors[i].generators, g1);
-        s.floors[i].generators = AUX_SET_BIT(s.floors[i].generators, g2);
+        s.floors[i].generators = AOC_SET_BIT(s.floors[i].generators, g1);
+        s.floors[i].generators = AOC_SET_BIT(s.floors[i].generators, g2);
 
         // check if only the elevator changed. can't move elevator without
         // moving an item
@@ -310,9 +311,9 @@ static void get_valid_actions(const facility *const state, AuxArrayFac *actions,
 
         uint32_t hash;
         if (is_valid_floor(&s.floors[i], materialCount) &&
-            !AuxHashsetFacContains(actionsHashset, s, &hash)) {
-          AuxArrayFacPush(actions, s);
-          AuxHashsetFacInsertPreHashed(actionsHashset, s, hash);
+            !AocHashsetFacContains(actionsHashset, s, &hash)) {
+          AocArrayFacPush(actions, s);
+          AocHashsetFacInsertPreHashed(actionsHashset, s, hash);
         }
       }
     }
@@ -326,25 +327,25 @@ static uint32_t solve(const facility *const startingFacility,
       .elevator = 3,
   };
   for (uint8_t i = 0; i < md->materialCount; ++i) {
-    destination.floors[3].chips = AUX_SET_BIT(destination.floors[3].chips, i);
+    destination.floors[3].chips = AOC_SET_BIT(destination.floors[3].chips, i);
     destination.floors[3].generators =
-        AUX_SET_BIT(destination.floors[3].generators, i);
+        AOC_SET_BIT(destination.floors[3].generators, i);
   }
 
-  AuxHashsetFac states = {0};
-  AuxHashsetFacCreate(&states, 64);
-  AuxHashsetFacInsert(&states, *startingFacility);
+  AocHashsetFac states = {0};
+  AocHashsetFacCreate(&states, 64);
+  AocHashsetFacInsert(&states, *startingFacility);
 
-  AuxArrayFac actions = {0};
-  AuxArrayFacCreate(&actions, 256);
+  AocArrayFac actions = {0};
+  AocArrayFacCreate(&actions, 256);
 
-  AuxHashsetFac actionsHashset = {0};
-  AuxHashsetFacCreate(&actionsHashset, 256);
+  AocHashsetFac actionsHashset = {0};
+  AocHashsetFacCreate(&actionsHashset, 256);
   get_valid_actions(startingFacility, &actions, &actionsHashset,
                     md->materialCount);
 
-  AuxArrayFac tmpActions = {0};
-  AuxArrayFacCreate(&tmpActions, 256);
+  AocArrayFac tmpActions = {0};
+  AocArrayFacCreate(&tmpActions, 256);
 
   uint32_t actionCount = 0;
 
@@ -361,9 +362,9 @@ static uint32_t solve(const facility *const startingFacility,
       for (size_t j = 0; j < tmpActions.length; ++j) {
         uint32_t hash;
         const facility *const tmp = &tmpActions.items[j];
-        if (!AuxHashsetFacContains(&states, *tmp, &hash)) {
-          AuxHashsetFacInsertPreHashed(&states, *tmp, hash);
-          AuxArrayFacPush(&actions, *tmp);
+        if (!AocHashsetFacContains(&states, *tmp, &hash)) {
+          AocHashsetFacInsertPreHashed(&states, *tmp, hash);
+          AocArrayFacPush(&actions, *tmp);
         }
       }
     }
@@ -375,10 +376,10 @@ static uint32_t solve(const facility *const startingFacility,
   }
 
 finish:
-  AuxArrayFacDestroy(&tmpActions);
-  AuxHashsetFacDestroy(&actionsHashset);
-  AuxArrayFacDestroy(&actions);
-  AuxHashsetFacDestroy(&states);
+  AocArrayFacDestroy(&tmpActions);
+  AocHashsetFacDestroy(&actionsHashset);
+  AocArrayFacDestroy(&actions);
+  AocHashsetFacDestroy(&states);
   return actionCount;
 }
 
@@ -389,18 +390,18 @@ int main(void) {
       .fac = &fac,
       .md = &md,
   };
-  AuxReadFileLineByLine("day11/input.txt", parse_line, &ctx);
+  AocReadFileLineByLine("day11/input.txt", parse_line, &ctx);
 
   const uint32_t part1 = solve(&fac, &md);
 
-  fac.floors[0].chips = AUX_SET_BIT(fac.floors[0].chips, md.materialCount);
+  fac.floors[0].chips = AOC_SET_BIT(fac.floors[0].chips, md.materialCount);
   fac.floors[0].generators =
-      AUX_SET_BIT(fac.floors[0].generators, md.materialCount);
+      AOC_SET_BIT(fac.floors[0].generators, md.materialCount);
   memcpy(&md.materials[md.materialCount++], "elerium", 8);
 
-  fac.floors[0].chips = AUX_SET_BIT(fac.floors[0].chips, md.materialCount);
+  fac.floors[0].chips = AOC_SET_BIT(fac.floors[0].chips, md.materialCount);
   fac.floors[0].generators =
-      AUX_SET_BIT(fac.floors[0].generators, md.materialCount);
+      AOC_SET_BIT(fac.floors[0].generators, md.materialCount);
   memcpy(&md.materials[md.materialCount++], "dilithium", 10);
 
   const uint32_t part2 = solve(&fac, &md);

@@ -1,11 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
-#include <stdint.h>
 #include <ctype.h>
 #include <math.h>
 
-#include <aux.h>
+#include <aoc/aoc.h>
 
 typedef enum {
   TURN_DIR_LEFT,
@@ -24,9 +22,9 @@ typedef struct {
   int length;
 } instruction;
 
-#define AUX_T instruction
-#define AUX_T_NAME Instr
-#include <aux_array.h>
+#define AOC_T instruction
+#define AOC_T_NAME Instr
+#include <aoc/array.h>
 
 typedef struct {
   int x;
@@ -40,9 +38,9 @@ static const position MOVE_POSITIONS[] = {
     [FACE_DIR_WEST] = {-1, 0},
 };
 
-static AuxArrayInstr parse(char *input) {
-  AuxArrayInstr instructions;
-  AuxArrayInstrCreate(&instructions, 128);
+static AocArrayInstr parse(char *input) {
+  AocArrayInstr instructions;
+  AocArrayInstrCreate(&instructions, 128);
   while (*input != '\0') {
     instruction instr = {0};
     instr.direction = *input == 'L' ? TURN_DIR_LEFT : TURN_DIR_RIGHT;
@@ -51,7 +49,7 @@ static AuxArrayInstr parse(char *input) {
     while (*input != '\0' && (*input == ' ' || *input == ',')) {
       input++;
     }
-    AuxArrayInstrPush(&instructions, instr);
+    AocArrayInstrPush(&instructions, instr);
   }
   return instructions;
 }
@@ -75,7 +73,7 @@ static inline void move(position *pos, const face_direction direction,
   pos->y += MOVE_POSITIONS[direction].y * amount;
 }
 
-static int solve_part1(const AuxArrayInstr *const instructions) {
+static int solve_part1(const AocArrayInstr *const instructions) {
   position pos = {0, 0};
   face_direction dir = FACE_DIR_NORTH;
   for (size_t i = 0; i < instructions->length; ++i) {
@@ -96,7 +94,7 @@ static inline uint32_t hash_position(const position pos) {
   return hash;
 }
 
-static int solve_part2(const AuxArrayInstr *const instructions) {
+static int solve_part2(const AocArrayInstr *const instructions) {
   position pos = {0, 0};
   face_direction dir = FACE_DIR_NORTH;
   // sum up lengths to know how many points there can be
@@ -145,17 +143,17 @@ done:
 int main(void) {
   char *input = NULL;
   size_t length = 0;
-  if (!AuxReadFileToString("day01/input.txt", &input, &length)) {
+  if (!AocReadFileToString("day01/input.txt", &input, &length)) {
     return EXIT_FAILURE;
   }
 
-  AuxArrayInstr instructions = parse(input);
+  AocArrayInstr instructions = parse(input);
   const int part1 = solve_part1(&instructions);
   const int part2 = solve_part2(&instructions);
 
   printf("%d\n", part1);
   printf("%d\n", part2);
 
-  AuxArrayInstrDestroy(&instructions);
+  AocArrayInstrDestroy(&instructions);
   free(input);
 }

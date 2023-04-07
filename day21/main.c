@@ -1,4 +1,4 @@
-#include <aux.h>
+#include <aoc/aoc.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -35,9 +35,9 @@ typedef struct {
   };
 } instruction;
 
-#define AUX_T instruction
-#define AUX_T_NAME Instr
-#include <aux_array.h>
+#define AOC_T instruction
+#define AOC_T_NAME Instr
+#include <aoc/array.h>
 
 static void swap_chars(char *input, const char a, const char b) {
   do {
@@ -198,7 +198,7 @@ static void parse_line(char *line, size_t length, void *userData) {
     instr.move.x = strtol(line, &line, 10);
     instr.move.y = strtol(line + 13, NULL, 10);
   }
-  AuxArrayInstrPush(userData, instr);
+  AocArrayInstrPush(userData, instr);
 }
 
 void print_instruction(const char *const input,
@@ -235,7 +235,7 @@ void print_instruction(const char *const input,
 }
 
 void scramble(char *const input, const size_t length,
-              const AuxArrayInstr *const instructions) {
+              const AocArrayInstr *const instructions) {
   char *buffer = malloc(length + 1);
 
   for (size_t i = 0; i < instructions->length; ++i) {
@@ -268,7 +268,7 @@ void scramble(char *const input, const size_t length,
 }
 
 void unscramble(char *const input, const size_t length,
-                const AuxArrayInstr *const instructions) {
+                const AocArrayInstr *const instructions) {
   char *buffer = malloc(length + 1);
 
   for (int64_t i = (int64_t)instructions->length - 1; i >= 0; --i) {
@@ -303,9 +303,9 @@ void unscramble(char *const input, const size_t length,
 }
 
 int main(void) {
-  AuxArrayInstr instructions = {0};
-  AuxArrayInstrCreate(&instructions, 100);
-  AuxReadFileLineByLine("day21/input.txt", parse_line, &instructions);
+  AocArrayInstr instructions = {0};
+  AocArrayInstrCreate(&instructions, 100);
+  AocReadFileLineByLine("day21/input.txt", parse_line, &instructions);
 
   char input1[] = "abcdefgh";
   const size_t length1 = sizeof(input1) - 1;
@@ -318,5 +318,5 @@ int main(void) {
   printf("%s\n", input1);
   printf("%s\n", input2);
 
-  AuxArrayInstrDestroy(&instructions);
+  AocArrayInstrDestroy(&instructions);
 }

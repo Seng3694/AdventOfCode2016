@@ -1,4 +1,4 @@
-#include <aux.h>
+#include <aoc/aoc.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -15,9 +15,9 @@ typedef struct {
   uint8_t b;
 } instruction;
 
-#define AUX_T instruction
-#define AUX_T_NAME Instr
-#include <aux_array.h>
+#define AOC_T instruction
+#define AOC_T_NAME Instr
+#include <aoc/array.h>
 
 typedef struct {
   uint8_t width;
@@ -59,8 +59,8 @@ static void parse_line(char *line, size_t length, void *userData) {
     instr.a = strtol(line + 5, &line, 10);
     instr.b = strtol(line + 1, NULL, 10);
   }
-  AuxArrayInstr *instructions = userData;
-  AuxArrayInstrPush(instructions, instr);
+  AocArrayInstr *instructions = userData;
+  AocArrayInstrPush(instructions, instr);
 }
 
 static void print_screen(const screen *const s) {
@@ -115,7 +115,7 @@ static uint32_t count_pixels(const screen *const s) {
   return count;
 }
 
-static uint32_t solve_part1(const AuxArrayInstr *const instructions,
+static uint32_t solve_part1(const AocArrayInstr *const instructions,
                             screen *const s) {
   for (size_t i = 0; i < instructions->length; ++i) {
     const instruction *const instr = &instructions->items[i];
@@ -135,9 +135,9 @@ static uint32_t solve_part1(const AuxArrayInstr *const instructions,
 }
 
 int main(void) {
-  AuxArrayInstr instructions;
-  AuxArrayInstrCreate(&instructions, 180);
-  AuxReadFileLineByLine("day08/input.txt", parse_line, &instructions);
+  AocArrayInstr instructions;
+  AocArrayInstrCreate(&instructions, 180);
+  AocReadFileLineByLine("day08/input.txt", parse_line, &instructions);
   screen s = {0};
   create_screen(&s, 50, 6);
 
@@ -147,5 +147,5 @@ int main(void) {
   print_screen(&s);
 
   destroy_screen(&s);
-  AuxArrayInstrDestroy(&instructions);
+  AocArrayInstrDestroy(&instructions);
 }

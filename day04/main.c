@@ -2,7 +2,7 @@
 #include <string.h>
 #include <ctype.h>
 
-#include <aux.h>
+#include <aoc/aoc.h>
 
 typedef struct {
   int count;
@@ -15,9 +15,9 @@ typedef struct {
   char checksum[5];
 } room_data;
 
-#define AUX_T room_data
-#define AUX_T_NAME Room
-#include <aux_array.h>
+#define AOC_T room_data
+#define AOC_T_NAME Room
+#include <aoc/array.h>
 
 static const char_info DEFAULT_CHAR_INFOS[26] = {
     {0, 'a'}, {0, 'b'}, {0, 'c'}, {0, 'd'}, {0, 'e'}, {0, 'f'}, {0, 'g'},
@@ -35,8 +35,8 @@ static void parse_line(char *line, size_t length, void *userData) {
   data.number = strtoul(line, &line, 10);
   memcpy(data.checksum, line + 1, 5);
 
-  AuxArrayRoom *rooms = userData;
-  AuxArrayRoomPush(rooms, data);
+  AocArrayRoom *rooms = userData;
+  AocArrayRoomPush(rooms, data);
 }
 
 static int char_info_compare(const void *const lhs, const void *const rhs) {
@@ -62,7 +62,7 @@ static inline bool verify_checksum(const char checksum[const 5],
   return true;
 }
 
-static int solve_part1(const AuxArrayRoom *const rooms) {
+static int solve_part1(const AocArrayRoom *const rooms) {
   char_info charInfos[26] = {0};
   int sum = 0;
   for (size_t i = 0; i < rooms->length; ++i) {
@@ -90,7 +90,7 @@ static inline void decrypt(char *text, const size_t length,
   }
 }
 
-static int solve_part2(AuxArrayRoom *const rooms) {
+static int solve_part2(AocArrayRoom *const rooms) {
   const char solution[] = "northpole object storage";
   const size_t solutionLength = sizeof(solution) - 1;
   for (size_t i = 0; i < rooms->length; ++i) {
@@ -107,9 +107,9 @@ static int solve_part2(AuxArrayRoom *const rooms) {
 }
 
 int main(void) {
-  AuxArrayRoom rooms;
-  AuxArrayRoomCreate(&rooms, 1000);
-  AuxReadFileLineByLine("day04/input.txt", parse_line, &rooms);
+  AocArrayRoom rooms;
+  AocArrayRoomCreate(&rooms, 1000);
+  AocReadFileLineByLine("day04/input.txt", parse_line, &rooms);
 
   const int part1 = solve_part1(&rooms);
   const int part2 = solve_part2(&rooms);
@@ -117,5 +117,5 @@ int main(void) {
   printf("%d\n", part1);
   printf("%d\n", part2);
 
-  AuxArrayRoomDestroy(&rooms);
+  AocArrayRoomDestroy(&rooms);
 }

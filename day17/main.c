@@ -1,5 +1,5 @@
-#include <aux.h>
-#include <aux_md5.h>
+#include <aoc/aoc.h>
+#include <aoc/md5.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -24,18 +24,18 @@ static const position directionMoves[] = {
     {1, 0},  // RIGHT
 };
 
-#define AUX_T char
-#define AUX_T_NAME Dir
-#include <aux_array.h>
+#define AOC_T char
+#define AOC_T_NAME Dir
+#include <aoc/array.h>
 
 typedef struct {
   position pos;
-  AuxArrayDir path;
+  AocArrayDir path;
 } state;
 
-#define AUX_T state
-#define AUX_T_NAME State
-#include <aux_array.h>
+#define AOC_T state
+#define AOC_T_NAME State
+#include <aoc/array.h>
 
 static const char hex_lookup[] = "0123456789abcdef";
 
@@ -47,7 +47,7 @@ static inline char get_hash_char(const uint8_t *const hash,
 
 state clone_state(const state *const s) {
   state clone = {.pos = s->pos};
-  AuxArrayDirCreate(&clone.path, s->path.capacity);
+  AocArrayDirCreate(&clone.path, s->path.capacity);
   clone.path.length = s->path.length;
   memcpy(clone.path.items, s->path.items, sizeof(char) * s->path.capacity);
   return clone;
@@ -77,12 +77,12 @@ static inline void move(position *const pos, const position dist) {
   pos->y += dist.y;
 }
 
-static void append_move(AuxArrayState *states, const state *const current,
+static void append_move(AocArrayState *states, const state *const current,
                         const direction dir) {
   state clone = clone_state(current);
-  AuxArrayDirPush(&clone.path, directionChars[dir]);
+  AocArrayDirPush(&clone.path, directionChars[dir]);
   move(&clone.pos, directionMoves[dir]);
-  AuxArrayStatePush(states, clone);
+  AocArrayStatePush(states, clone);
 }
 
 static inline bool has_reached_vault(const uint8_t x, const uint8_t y) {
@@ -91,14 +91,14 @@ static inline bool has_reached_vault(const uint8_t x, const uint8_t y) {
 
 static void solve(const char *const input, const size_t inputLength,
                   const bool part1) {
-  AuxArrayState states = {0};
-  AuxArrayStateCreate(&states, 128);
+  AocArrayState states = {0};
+  AocArrayStateCreate(&states, 128);
 
   state start = {.pos = {0, 0}};
-  AuxArrayDirCreate(&start.path, 64);
+  AocArrayDirCreate(&start.path, 64);
   memset(start.path.items, 0, sizeof(char) * start.path.capacity);
 
-  AuxArrayStatePush(&states, start);
+  AocArrayStatePush(&states, start);
 
   size_t hashBufferCapacity = 128;
   char *hashBuffer = malloc(sizeof(char) * hashBufferCapacity);
@@ -121,7 +121,7 @@ static void solve(const char *const input, const size_t inputLength,
 
       memcpy(hashBuffer + inputLength, CURRENT.path.items,
              sizeof(char) * CURRENT.path.length);
-      AuxMD5(hashBuffer, inputLength + CURRENT.path.length, hash);
+      AocMD5(hashBuffer, inputLength + CURRENT.path.length, hash);
 
       // moves will only be appended when they don't reach the vault.
       if (can_move_down(hash, CURRENT.pos)) {
@@ -162,7 +162,7 @@ static void solve(const char *const input, const size_t inputLength,
 
     for (size_t i = 0; i < statesLength; ++i) {
       // TODO: think of a smarter way of reusing them
-      AuxArrayDirDestroy(&states.items[i].path);
+      AocArrayDirDestroy(&states.items[i].path);
     }
 
     const size_t newLength = states.length - statesLength;
@@ -178,8 +178,8 @@ static void solve(const char *const input, const size_t inputLength,
 finish:
   free(hashBuffer);
   for (size_t i = 0; i < states.length; ++i)
-    AuxArrayDirDestroy(&states.items[i].path);
-  AuxArrayStateDestroy(&states);
+    AocArrayDirDestroy(&states.items[i].path);
+  AocArrayStateDestroy(&states);
 }
 
 int main(void) {

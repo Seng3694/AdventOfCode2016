@@ -1,4 +1,4 @@
-#include <aux.h>
+#include <aoc/aoc.h>
 #include <string.h>
 #include <stdio.h>
 
@@ -8,9 +8,9 @@ typedef struct {
   char data[CODE_LENGTH];
 } code;
 
-#define AUX_T code
-#define AUX_T_NAME Code
-#include <aux_array.h>
+#define AOC_T code
+#define AOC_T_NAME Code
+#include <aoc/array.h>
 
 typedef struct {
   int count;
@@ -32,12 +32,12 @@ static int char_info_compare(const void *const lhs, const void *const rhs) {
 }
 
 static void parse_line(char *line, size_t length, void *userData) {
-  AuxArrayCode *codes = userData;
+  AocArrayCode *codes = userData;
   memcpy(codes->items + codes->length, line, CODE_LENGTH);
   codes->length++;
 }
 
-static void solve_both_parts(const AuxArrayCode *const codes, char *const part1,
+static void solve_both_parts(const AocArrayCode *const codes, char *const part1,
                              char *const part2) {
   char_info infos[CODE_LENGTH][26];
   for (size_t i = 0; i < CODE_LENGTH; ++i)
@@ -59,9 +59,9 @@ static void solve_both_parts(const AuxArrayCode *const codes, char *const part1,
 }
 
 int main(void) {
-  AuxArrayCode codes;
-  AuxArrayCodeCreate(&codes, 640);
-  AuxReadFileLineByLine("day06/input.txt", parse_line, &codes);
+  AocArrayCode codes;
+  AocArrayCodeCreate(&codes, 640);
+  AocReadFileLineByLine("day06/input.txt", parse_line, &codes);
 
   char part1[CODE_LENGTH + 1] = {0};
   char part2[CODE_LENGTH + 1] = {0};
@@ -71,5 +71,5 @@ int main(void) {
   printf("%s\n", part1);
   printf("%s\n", part2);
 
-  AuxArrayCodeDestroy(&codes);
+  AocArrayCodeDestroy(&codes);
 }

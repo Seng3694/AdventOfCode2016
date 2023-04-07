@@ -1,4 +1,4 @@
-#include <aux.h>
+#include <aoc/aoc.h>
 #include <string.h>
 #include <stdio.h>
 
@@ -20,19 +20,19 @@ typedef struct {
   char b;
 } aba_data;
 
-#define AUX_T ipv7_address
-#define AUX_T_NAME Ipv7
-#include <aux_array.h>
+#define AOC_T ipv7_address
+#define AOC_T_NAME Ipv7
+#include <aoc/array.h>
 
-#define AUX_T aba_data
-#define AUX_T_NAME AbaData
-#include <aux_array.h>
+#define AOC_T aba_data
+#define AOC_T_NAME AbaData
+#include <aoc/array.h>
 
 static void parse(char *line, size_t length, void *userData) {
-  AuxArrayIpv7 *addresses = userData;
-  AuxArrayIpv7Push(addresses, (ipv7_address){0});
-  ipv7_address *address = AuxArrayIpv7Last(addresses);
-  AuxRemoveTrailingWhitespace(line, &length);
+  AocArrayIpv7 *addresses = userData;
+  AocArrayIpv7Push(addresses, (ipv7_address){0});
+  ipv7_address *address = AocArrayIpv7Last(addresses);
+  AocTrimRight(line, &length);
   memcpy(address->line, line, length);
   if (*address->line != '[')
     address->strings[0].start = address->line;
@@ -72,10 +72,10 @@ static bool has_abba_pattern(const char *const str, const size_t length) {
 }
 
 static void get_all_aba_patterns(const char *const str, const size_t length,
-                                 AuxArrayAbaData *const abaDataArr) {
+                                 AocArrayAbaData *const abaDataArr) {
   for (size_t i = 0; i + 2 < length; ++i) {
     if (str[i] == str[i + 2] && str[i] != str[i + 1]) {
-      AuxArrayAbaDataPush(abaDataArr, (aba_data){.a = str[i], .b = str[i + 1]});
+      AocArrayAbaDataPush(abaDataArr, (aba_data){.a = str[i], .b = str[i + 1]});
     }
   }
 }
@@ -90,7 +90,7 @@ static bool has_specific_aba_pattern(const char *const str, const size_t length,
   return false;
 }
 
-static uint32_t solve_part1(const AuxArrayIpv7 *const addresses) {
+static uint32_t solve_part1(const AocArrayIpv7 *const addresses) {
   uint32_t count = 0;
   for (size_t i = 0; i < addresses->length; ++i) {
     ipv7_address *a = &addresses->items[i];
@@ -110,10 +110,10 @@ static uint32_t solve_part1(const AuxArrayIpv7 *const addresses) {
   return count;
 }
 
-static uint32_t solve_part2(const AuxArrayIpv7 *const addresses) {
+static uint32_t solve_part2(const AocArrayIpv7 *const addresses) {
   uint32_t count = 0;
-  AuxArrayAbaData abaDataArr;
-  AuxArrayAbaDataCreate(&abaDataArr, 16);
+  AocArrayAbaData abaDataArr;
+  AocArrayAbaDataCreate(&abaDataArr, 16);
   for (size_t i = 0; i < addresses->length; ++i) {
     ipv7_address *adr = &addresses->items[i];
     for (size_t j = 0; j < adr->bracketsCount; ++j) {
@@ -132,21 +132,21 @@ static uint32_t solve_part2(const AuxArrayIpv7 *const addresses) {
       }
     }
   next_address:
-    AuxArrayAbaDataClear(&abaDataArr);
+    AocArrayAbaDataClear(&abaDataArr);
   }
-  AuxArrayAbaDataDestroy(&abaDataArr);
+  AocArrayAbaDataDestroy(&abaDataArr);
   return count;
 }
 
 int main(void) {
-  AuxArrayIpv7 addresses;
-  AuxArrayIpv7Create(&addresses, 2004);
-  AuxReadFileLineByLine("day07/input.txt", parse, &addresses);
+  AocArrayIpv7 addresses;
+  AocArrayIpv7Create(&addresses, 2004);
+  AocReadFileLineByLine("day07/input.txt", parse, &addresses);
 
   const uint32_t part1 = solve_part1(&addresses);
   const uint32_t part2 = solve_part2(&addresses);
   printf("%u\n", part1);
   printf("%u\n", part2);
 
-  AuxArrayIpv7Destroy(&addresses);
+  AocArrayIpv7Destroy(&addresses);
 }

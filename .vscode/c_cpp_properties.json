@@ -3,7 +3,7 @@
         {
             "name": "Linux",
             "includePath": [
-                "${workspaceFolder}/aux"
+                "${workspaceFolder}/aocaux/src"
             ],
             "cStandard": "c99",
             "intelliSenseMode": "gcc-x64",

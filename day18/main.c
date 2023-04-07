@@ -1,4 +1,4 @@
-#include <aux.h>
+#include <aoc/aoc.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -86,9 +86,9 @@ static uint32_t solve(const char *const input, const size_t width,
 int main(void) {
   char *input;
   size_t length;
-  if (!AuxReadFileToString("day18/input.txt", &input, &length))
+  if (!AocReadFileToString("day18/input.txt", &input, &length))
     return EXIT_FAILURE;
-  AuxRemoveTrailingWhitespace(input, &length);
+  AocTrimRight(input, &length);
 
   const uint32_t part1 = solve(input, length, 40);
   const uint32_t part2 = solve(input, length, 400000);

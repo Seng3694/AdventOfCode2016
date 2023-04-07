@@ -1,4 +1,4 @@
-#include <aux.h>
+#include <aoc/aoc.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>

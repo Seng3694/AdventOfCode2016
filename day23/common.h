@@ -1,7 +1,7 @@
 #ifndef DAY23_COMMON_H
 #define DAY23_COMMON_H
 
-#include <aux.h>
+#include <aoc/aoc.h>
 #include <ctype.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -43,8 +43,8 @@ typedef struct {
   int8_t operand2;
 } instruction;
 
-#define AUX_T instruction
-#define AUX_T_NAME Instr
-#include <aux_array.h>
+#define AOC_T instruction
+#define AOC_T_NAME Instr
+#include <aoc/array.h>
 
 #endif

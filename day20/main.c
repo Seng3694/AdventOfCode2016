@@ -1,4 +1,4 @@
-#include <aux.h>
+#include <aoc/aoc.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -7,15 +7,15 @@ typedef struct {
   uint64_t to;
 } range;
 
-#define AUX_T range
-#define AUX_T_NAME Range
-#include <aux_array.h>
+#define AOC_T range
+#define AOC_T_NAME Range
+#include <aoc/array.h>
 
 static void parse_line(char *line, size_t length, void *userData) {
   range r = {0};
   r.from = (uint64_t)strtol(line, &line, 10);
   r.to = (uint64_t)strtol(line + 1, NULL, 10);
-  AuxArrayRangePush(userData, r);
+  AocArrayRangePush(userData, r);
 }
 
 static int compare_range(const void *const a, const void *const b) {
@@ -33,7 +33,7 @@ static int compare_range(const void *const a, const void *const b) {
   }
 }
 
-static uint64_t solve_part1(const AuxArrayRange *const ranges) {
+static uint64_t solve_part1(const AocArrayRange *const ranges) {
   uint64_t lowest = 0;
   for (size_t i = 0; i < ranges->length; ++i) {
     const range *const r = &ranges->items[i];
@@ -45,7 +45,7 @@ static uint64_t solve_part1(const AuxArrayRange *const ranges) {
   return lowest;
 }
 
-static uint64_t solve_part2(const AuxArrayRange *const ranges) {
+static uint64_t solve_part2(const AocArrayRange *const ranges) {
   uint64_t current = 0;
   uint64_t allowed = 0;
   for (size_t i = 0; i < ranges->length; ++i) {
@@ -60,9 +60,9 @@ static uint64_t solve_part2(const AuxArrayRange *const ranges) {
 }
 
 int main(void) {
-  AuxArrayRange ranges = {0};
-  AuxArrayRangeCreate(&ranges, 1080);
-  AuxReadFileLineByLine("day20/input.txt", parse_line, &ranges);
+  AocArrayRange ranges = {0};
+  AocArrayRangeCreate(&ranges, 1080);
+  AocReadFileLineByLine("day20/input.txt", parse_line, &ranges);
   qsort(ranges.items, ranges.length, sizeof(range), compare_range);
 
   const uint64_t part1 = solve_part1(&ranges);
@@ -71,5 +71,5 @@ int main(void) {
   printf("%lu\n", part1);
   printf("%lu\n", part2);
 
-  AuxArrayRangeDestroy(&ranges);
+  AocArrayRangeDestroy(&ranges);
 }

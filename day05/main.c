@@ -1,4 +1,4 @@
-#include <aux_md5.h>
+#include <aoc/md5.h>
 #include <string.h>
 #include <stdio.h>
 
@@ -28,7 +28,7 @@ static void solve_both_parts(const char input[], const size_t inputLength,
   uint8_t hashResult[16] = {0};
   for (size_t i = 0; solutionLength2 < 8; ++i) {
     sprintf(start, "%zu", i);
-    AuxMD5(buffer, strlen(buffer), hashResult);
+    AocMD5(buffer, strlen(buffer), hashResult);
     if (starts_with_5_zeroes(hashResult)) {
       const uint8_t index = get_sixth_hash_digit(hashResult);
       if (solutionLength1 < 8)

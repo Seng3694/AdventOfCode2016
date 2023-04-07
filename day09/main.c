@@ -1,4 +1,4 @@
-#include <aux.h>
+#include <aoc/aoc.h>
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -51,10 +51,10 @@ static size_t solve_part2(char *input, const size_t length) {
 int main(void) {
   char *input = NULL;
   size_t length;
-  if (!AuxReadFileToString("day09/input.txt", &input, &length)) {
+  if (!AocReadFileToString("day09/input.txt", &input, &length)) {
     return EXIT_FAILURE;
   }
-  AuxRemoveTrailingWhitespace(input, &length);
+  AocTrimRight(input, &length);
 
   const size_t part1 = solve_part1(input, length);
   const size_t part2 = solve_part2(input, length);

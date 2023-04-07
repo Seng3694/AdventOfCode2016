@@ -59,8 +59,8 @@ static void parse_line(char *line, size_t length, void *userData) {
     break;
   }
 
-  AuxArrayInstr *instructions = userData;
-  AuxArrayInstrPush(instructions, instr);
+  AocArrayInstr *instructions = userData;
+  AocArrayInstrPush(instructions, instr);
 }
 
 static const uint8_t toggleMap[] = {
@@ -124,7 +124,7 @@ static const uint8_t toggleMap[] = {
     [INSTR_TYPE(tgl_d)] = INSTR_TYPE(inc_d),
 };
 
-static void run(AuxArrayInstr *const instructions, registers *const r) {
+static void run(AocArrayInstr *const instructions, registers *const r) {
   instruction *const instr = instructions->items;
   register int32_t pc = -1;
 
@@ -238,13 +238,13 @@ static void run(AuxArrayInstr *const instructions, registers *const r) {
 }
 
 int main(void) {
-  AuxArrayInstr instructions;
-  AuxArrayInstrCreate(&instructions, 32);
-  AuxReadFileLineByLine("day23/input.txt", parse_line, &instructions);
-  AuxArrayInstrPush(&instructions, (instruction){.type = instr_type_nop});
+  AocArrayInstr instructions;
+  AocArrayInstrCreate(&instructions, 32);
+  AocReadFileLineByLine("day23/input.txt", parse_line, &instructions);
+  AocArrayInstrPush(&instructions, (instruction){.type = instr_type_nop});
 
-  AuxArrayInstr workingCopy;
-  AuxArrayInstrDuplicate(&workingCopy, &instructions);
+  AocArrayInstr workingCopy;
+  AocArrayInstrDuplicate(&workingCopy, &instructions);
 
   registers r = {.a = 7};
   run(&workingCopy, &r);
@@ -254,7 +254,7 @@ int main(void) {
   print_program(&workingCopy, &r, workingCopy.length - 1);
 #endif
 
-  AuxArrayInstrCopy(&workingCopy, &instructions);
+  AocArrayInstrCopy(&workingCopy, &instructions);
   r = (registers){.a = 12};
   run(&workingCopy, &r);
   const int32_t part2 = r.a;
@@ -266,6 +266,6 @@ int main(void) {
   printf("%d\n", part1);
   printf("%d\n", part2);
 
-  AuxArrayInstrDestroy(&workingCopy);
-  AuxArrayInstrDestroy(&instructions);
+  AocArrayInstrDestroy(&workingCopy);
+  AocArrayInstrDestroy(&instructions);
 }

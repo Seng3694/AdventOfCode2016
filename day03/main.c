@@ -1,4 +1,4 @@
-#include <aux.h>
+#include <aoc/aoc.h>
 #include <stdio.h>
 
 typedef struct {
@@ -7,16 +7,16 @@ typedef struct {
   uint32_t c;
 } triangle;
 
-#define AUX_T triangle
-#define AUX_T_NAME Triangle
-#include <aux_array.h>
+#define AOC_T triangle
+#define AOC_T_NAME Triangle
+#include <aoc/array.h>
 
 static void parse_line(char *line, size_t length, void *userData) {
-  AuxRemoveTrailingWhitespace(line, &length);
+  AocTrimRight(line, &length);
   triangle t = {0};
   sscanf(line, "%u %u %u", &t.a, &t.b, &t.c);
-  AuxArrayTriangle *triangles = userData;
-  AuxArrayTrianglePush(triangles, t);
+  AocArrayTriangle *triangles = userData;
+  AocArrayTrianglePush(triangles, t);
 }
 
 static inline bool is_valid_triangle(const uint32_t a, const uint32_t b,
@@ -24,7 +24,7 @@ static inline bool is_valid_triangle(const uint32_t a, const uint32_t b,
   return a + b > c && a + c > b && b + c > a;
 }
 
-static int solve_part1(const AuxArrayTriangle *const triangles) {
+static int solve_part1(const AocArrayTriangle *const triangles) {
   int solution = 0;
   for (size_t i = 0; i < triangles->length; ++i) {
     const triangle *const t = &triangles->items[i];
@@ -33,7 +33,7 @@ static int solve_part1(const AuxArrayTriangle *const triangles) {
   return solution;
 }
 
-static int solve_part2(const AuxArrayTriangle *const triangles) {
+static int solve_part2(const AocArrayTriangle *const triangles) {
   int solution = 0;
   for (size_t i = 0; i < triangles->length; i += 3) {
     const triangle *const t1 = &triangles->items[i];
@@ -47,9 +47,9 @@ static int solve_part2(const AuxArrayTriangle *const triangles) {
 }
 
 int main(void) {
-  AuxArrayTriangle triangles;
-  AuxArrayTriangleCreate(&triangles, 2000);
-  AuxReadFileLineByLine("day03/input.txt", parse_line, &triangles);
+  AocArrayTriangle triangles;
+  AocArrayTriangleCreate(&triangles, 2000);
+  AocReadFileLineByLine("day03/input.txt", parse_line, &triangles);
 
   const int part1 = solve_part1(&triangles);
   const int part2 = solve_part2(&triangles);
@@ -57,5 +57,5 @@ int main(void) {
   printf("%d\n", part1);
   printf("%d\n", part2);
 
-  AuxArrayTriangleDestroy(&triangles);
+  AocArrayTriangleDestroy(&triangles);
 }

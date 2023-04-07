@@ -1,4 +1,4 @@
-#include <aux.h>
+#include <aoc/aoc.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -18,14 +18,14 @@ typedef struct {
   uint8_t y;
 } node;
 
-#define AUX_T node
-#define AUX_T_NAME Node
-#include <aux_array.h>
+#define AOC_T node
+#define AOC_T_NAME Node
+#include <aoc/array.h>
 
 typedef struct {
   uint8_t width;
   uint8_t height;
-  AuxArrayNode nodes;
+  AocArrayNode nodes;
 } parsing_context;
 
 typedef struct {
@@ -42,16 +42,17 @@ static inline bool position_equals(const position *const a,
   return a->x == b->x && a->y == b->y;
 }
 
-#define AUX_T position
-#define AUX_T_NAME Pos
-#define AUX_T_EMPTY ((position){0xff, 0xff})
-#define AUX_T_HFUNC(x) calc_position_hash(x)
-#define AUX_T_EQUALS(a, b) position_equals(a, b)
-#include <aux_hashset.h>
+#define AOC_T position
+#define AOC_T_NAME Pos
+#define AOC_T_EMPTY ((position){0xff, 0xff})
+#define AOC_T_HFUNC(x) calc_position_hash(x)
+#define AOC_T_EQUALS(a, b) position_equals(a, b)
+#define AOC_BASE2_CAPACITY
+#include <aoc/hashset.h>
 
-#define AUX_T position
-#define AUX_T_NAME Pos
-#include <aux_array.h>
+#define AOC_T position
+#define AOC_T_NAME Pos
+#include <aoc/array.h>
 
 typedef struct {
   uint8_t width;
@@ -98,7 +99,7 @@ static void parse_line(char *line, size_t length, void *userData) {
     skip_whitespaces(line + 1, &line);
     n.used = strtol(line, NULL, 10);
     parsing_context *const ctx = userData;
-    AuxArrayNodePush(&ctx->nodes, n);
+    AocArrayNodePush(&ctx->nodes, n);
     if (ctx->width < n.x)
       ctx->width = n.x;
     if (ctx->height < n.y)
@@ -150,14 +151,14 @@ static void get_next_positions(const grid *const g,
 
 static uint32_t shortest_path(const grid *const g, const position from,
                               const position to) {
-  AuxHashsetPos visited = {0};
-  AuxHashsetPosCreate(&visited, 2048);
+  AocHashsetPos visited = {0};
+  AocHashsetPosCreate(&visited, 2048);
 
-  AuxArrayPos positions = {0};
-  AuxArrayPosCreate(&positions, 128);
+  AocArrayPos positions = {0};
+  AocArrayPosCreate(&positions, 128);
 
-  AuxArrayPosPush(&positions, from);
-  AuxHashsetPosInsert(&visited, from);
+  AocArrayPosPush(&positions, from);
+  AocHashsetPosInsert(&visited, from);
 
   position nextPositions[4] = {0};
   uint32_t nextPositionsCount = 0;
@@ -175,9 +176,9 @@ static uint32_t shortest_path(const grid *const g, const position from,
           goto finish;
         }
         uint32_t hash;
-        if (!AuxHashsetPosContains(&visited, nextPositions[j], &hash)) {
-          AuxHashsetPosInsertPreHashed(&visited, nextPositions[j], hash);
-          AuxArrayPosPush(&positions, nextPositions[j]);
+        if (!AocHashsetPosContains(&visited, nextPositions[j], &hash)) {
+          AocHashsetPosInsertPreHashed(&visited, nextPositions[j], hash);
+          AocArrayPosPush(&positions, nextPositions[j]);
         }
       }
     }
@@ -191,8 +192,8 @@ static uint32_t shortest_path(const grid *const g, const position from,
   }
 
 finish:
-  AuxArrayPosDestroy(&positions);
-  AuxHashsetPosDestroy(&visited);
+  AocArrayPosDestroy(&positions);
+  AocHashsetPosDestroy(&visited);
   return distance;
 }
 
@@ -221,14 +222,14 @@ static uint32_t solve_part2(const grid *const g) {
 
 int main(void) {
   parsing_context ctx = {0};
-  AuxArrayNodeCreate(&ctx.nodes, 1080);
-  AuxReadFileLineByLine("day22/input.txt", parse_line, &ctx);
+  AocArrayNodeCreate(&ctx.nodes, 1080);
+  AocReadFileLineByLine("day22/input.txt", parse_line, &ctx);
   ctx.width++;
   ctx.height++;
 
   grid g = {0};
   grid_init(&ctx, &g);
-  AuxArrayNodeDestroy(&ctx.nodes);
+  AocArrayNodeDestroy(&ctx.nodes);
 
   const uint32_t part1 = solve_part1(&g);
   const uint32_t part2 = solve_part2(&g);

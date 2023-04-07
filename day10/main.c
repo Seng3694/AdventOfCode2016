@@ -1,4 +1,4 @@
-#include <aux.h>
+#include <aoc/aoc.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -158,7 +158,7 @@ static void solve_both_parts(context *const ctx, uint8_t *part1,
 
 int main(void) {
   context ctx = {0};
-  AuxReadFileLineByLine("day10/input.txt", parse_line, &ctx);
+  AocReadFileLineByLine("day10/input.txt", parse_line, &ctx);
 
   uint8_t part1 = 0;
   uint32_t part2 = 0;
